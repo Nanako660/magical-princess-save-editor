@@ -41,8 +41,18 @@ export function decrypt(base64Cipher) {
     })
     
     let text = wordArrayToUtf8(decrypted)
-    // Remove trailing null bytes (ZeroPadding)
-    text = text.replace(/\0+$/, '')
+    
+    // 清理字符串：移除null字节和控制字符
+    text = text.replace(/\0+$/, '')  // 移除尾部null字节
+    text = text.replace(/[\x00-\x1F\x7F]/g, '')  // 移除控制字符
+    
+    // 只保留JSON内容（从第一个{到最后一个}）
+    const firstBrace = text.indexOf('{')
+    const lastBrace = text.lastIndexOf('}')
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      text = text.substring(firstBrace, lastBrace + 1)
+    }
+    
     return text
   } catch (e) {
     console.error('Decryption failed:', e)

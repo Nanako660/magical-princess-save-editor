@@ -9,7 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vicons/ionicons5": "^0.13.0",
     "crypto-js": "^4.2.0",
+    "naive-ui": "^2.44.1",
+    "vfonts": "^0.0.3",
     "vue": "^3.4.0"
   },
   "devDependencies": {

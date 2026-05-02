@@ -100,25 +100,16 @@ export default {
 </script>
 
 <style scoped>
-.editor-section { max-width: 1200px; }
 .section-title {
   margin-bottom: 1.5rem;
   color: #667eea;
   border-bottom: 2px solid #667eea;
   padding-bottom: 0.5rem;
 }
-.npc-group {
-  margin-bottom: 2rem;
-}
-.group-title {
-  color: #8b5cf6;
-  font-size: 1.1rem;
+.friend-card {
   margin-bottom: 1rem;
-  padding-left: 0.5rem;
-  border-left: 3px solid #8b5cf6;
 }
-.npc-name {
-  font-weight: 600;
-  color: #9c88ff;
+.friend-card :deep(.n-card-header) {
+  padding-left: 0.5rem;
 }
 </style>

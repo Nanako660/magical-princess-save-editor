@@ -258,3 +258,99 @@ export const ItemKeyMapReverse = Object.fromEntries(
 export const SkillKeyMapReverse = Object.fromEntries(
   Object.entries(SkillKeyMap).map(([k, v]) => [v, k])
 )
+
+// BattleArtsDataParam字段键名映射
+export const BattleArtsKeyMap = {
+  id: 'battleArtsId',
+  l: 'isLearned'
+}
+
+// ActivityDataParam字段键名映射
+export const ActivityKeyMap = {
+  id: 'activityID',
+  c: 'eventCount',
+  cm: 'eventCountMonth',
+  tm: 'tryCountMonth',
+  cc: 'completeCount',
+  fc: 'freeCount',
+  b: 'badCount',
+  d: 'damageCount',
+  t: 'theftCount',
+  l: 'level',
+  s: 'isSale',
+  n: 'isBonus'
+}
+
+// CurriculumDataParam字段键名映射
+export const CurriculumKeyMap = {
+  id: 'curriculumId',
+  a: 'isActive',
+  c: 'isComplete',
+  h: 'restHP'
+}
+
+// SaveDataUserConfig字段键名映射
+export const ConfigKeyMap = {
+  lt: 'lang',
+  vb: 'volumeBGM',
+  ve: 'volumeSE',
+  vv: 'volumeVoice',
+  ms: 'messageSpeed',
+  cm: 'isCastingMode',
+  fg: 'flagEventReadedGlobal',
+  fi: 'flagItemGettedGlobal'
+}
+
+// SaveDataUserDevice字段键名映射
+export const DeviceKeyMap = {
+  fs: 'isFullScreen',
+  re: 'resolutionListId',
+  qlt: 'qualityListType'
+}
+
+// SaveDataIndexParams字段键名映射
+export const IndexParamsKeyMap = {
+  ip: 'isPlaying',
+  in: 'isNextLoopStart',
+  id: 'saveSlotId',
+  lo: 'loopCount',
+  pd: 'period',
+  pn: 'playerName',
+  dt: 'date',
+  lp: 'levelPhysical',
+  li: 'levelIntelligence',
+  lc: 'levelCharm',
+  ls: 'levelSense',
+  lb: 'levelBattle',
+  la: 'levelArts',
+  lm: 'levelMagic',
+  ac: 'acClass',
+  cv: 'charaFav',
+  lt: 'location',
+  st: 'situation'
+}
+
+// 反向映射
+export const BattleArtsKeyMapReverse = Object.fromEntries(
+  Object.entries(BattleArtsKeyMap).map(([k, v]) => [v, k])
+)
+
+export const ActivityKeyMapReverse = Object.fromEntries(
+  Object.entries(ActivityKeyMap).map(([k, v]) => [v, k])
+)
+
+export const CurriculumKeyMapReverse = Object.fromEntries(
+  Object.entries(CurriculumKeyMap).map(([k, v]) => [v, k])
+)
+
+export const ConfigKeyMapReverse = Object.fromEntries(
+  Object.entries(ConfigKeyMap).map(([k, v]) => [v, k])
+)
+
+export const DeviceKeyMapReverse = Object.fromEntries(
+  Object.entries(DeviceKeyMap).map(([k, v]) => [v, k])
+)
+
+export const IndexParamsKeyMapReverse = Object.fromEntries(
+  Object.entries(IndexParamsKeyMap).map(([k, v]) => [v, k])
+)

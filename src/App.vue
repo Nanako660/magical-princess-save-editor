@@ -106,6 +106,11 @@
             <SkillEditor v-if="activeTab === 'skills'" :skill-list="saveData.skillDataParamList" @update:skill-list="saveData.skillDataParamList = $event" />
             <GlobalEditor v-if="activeTab === 'global'" :gstatus="saveData.gstatus" />
             <QuickActions v-if="activeTab === 'quick'" @execute="handleQuickAction" @query="handleQuery" />
+            <BattleArtsEditor v-if="activeTab === 'battlearts'" :arts-list="saveData.battleArtsDataParamList" @update:arts-list="saveData.battleArtsDataParamList = $event" />
+            <ActivityEditor v-if="activeTab === 'activity'" :activity-list="saveData.activityDataParamList" @update:activity-list="saveData.activityDataParamList = $event" />
+            <CurriculumEditor v-if="activeTab === 'curriculum'" :curriculum-list="saveData.curriculumDataParamList" @update:curriculum-list="saveData.curriculumDataParamList = $event" />
+            <ConfigEditor v-if="activeTab === 'config' && configData" :config="configData" />
+            <DeviceEditor v-if="activeTab === 'device' && deviceData" :device="deviceData" />
           </n-layout-content>
         </n-layout>
 
@@ -151,6 +156,11 @@ import ItemEditor from './components/ItemEditor.vue'
 import SkillEditor from './components/SkillEditor.vue'
 import GlobalEditor from './components/GlobalEditor.vue'
 import QuickActions from './components/QuickActions.vue'
+import ConfigEditor from './components/ConfigEditor.vue'
+import DeviceEditor from './components/DeviceEditor.vue'
+import BattleArtsEditor from './components/BattleArtsEditor.vue'
+import ActivityEditor from './components/ActivityEditor.vue'
+import CurriculumEditor from './components/CurriculumEditor.vue'
 
 export default {
   name: 'App',
@@ -160,7 +170,8 @@ export default {
     NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal,
     FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline,
     SetupGuide, Sidebar, BasicEditor, DetailedEditor, EquipmentEditor,
-    FriendEditor, ItemEditor, SkillEditor, GlobalEditor, QuickActions
+    FriendEditor, ItemEditor, SkillEditor, GlobalEditor, QuickActions,
+    ConfigEditor, DeviceEditor, BattleArtsEditor, ActivityEditor, CurriculumEditor
   },
 
   setup() {
@@ -171,7 +182,11 @@ export default {
     const {
       saveData, isLoading, fileName, error,
       dirReady, dirName, saveSlots,
+      indexData, configData, deviceData,
+      indexFileName, configFileName, deviceFileName,
       pickDir, loadSlot, downloadSave,
+      loadIndexData, loadConfigData, loadDeviceData,
+      downloadConfig, downloadDevice,
       getMonthText, hasData, resetDir
     } = useSaveData()
 
@@ -257,6 +272,8 @@ export default {
       saveData, isLoading, fileName, activeTab, hasData, footerText,
       dirReady, dirName, saveSlots, slotPopoverShow, isSaving,
       showSaveModal,
+      indexData, configData, deviceData,
+      indexFileName, configFileName, deviceFileName,
       handlePickDir, handleLoadSlot, openSaveModal, handleSave, handleBack,
       handleQuery, handleQuickAction, handleReset, formatSize
     }
@@ -323,13 +340,29 @@ html, body, #app {
 .app-content :deep(.n-layout-scroll-container) {
   display: flex;
   flex-direction: column;
-  padding: 24px;
+  padding: 24px 32px;
   box-sizing: border-box;
 }
 
 .app-content :deep(.editor-section) {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1600px;
+}
+
+/* 响应式：小屏幕自动适配 */
+@media (max-width: 1600px) {
+  .app-content :deep(.editor-section) {
+    max-width: calc(100% - 16px);
+  }
+}
+
+@media (max-width: 1200px) {
+  .app-content :deep(.n-layout-scroll-container) {
+    padding: 24px 16px;
+  }
+  .app-content :deep(.editor-section) {
+    max-width: calc(100% - 8px);
+  }
 }
 
 .app-footer {

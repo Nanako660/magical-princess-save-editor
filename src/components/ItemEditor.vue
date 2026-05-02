@@ -113,42 +113,18 @@ export default {
 </script>
 
 <style scoped>
-.editor-section { 
-  width: 100%;
-  max-width: 1200px;
-  height: calc(100vh - 156px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
 .section-title {
   margin-bottom: 1.5rem;
   color: #667eea;
   border-bottom: 2px solid #667eea;
   padding-bottom: 0.5rem;
 }
-.list-controls {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 16px;
-}
-.item-groups {
-  flex: 1;
-  min-height: 0;
-}
-.item-group {
-  margin-bottom: 1.5rem;
-}
-.group-title {
-  color: #8b5cf6;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  padding-left: 0.5rem;
-  border-left: 3px solid #8b5cf6;
-}
-:deep(.item-name) {
+.group-header {
   font-weight: 600;
-  color: #9c88ff;
+  margin-bottom: 0.5rem;
+  color: #888;
+}
+.item-row :deep(.n-input-number) {
+  width: 80px;
 }
 </style>

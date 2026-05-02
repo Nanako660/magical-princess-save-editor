@@ -5,7 +5,24 @@ import {
   GlobalStatusKeyMap, 
   FriendKeyMap, 
   ItemKeyMap, 
-  SkillKeyMap 
+  SkillKeyMap,
+  BattleArtsKeyMap,
+  ActivityKeyMap,
+  CurriculumKeyMap,
+  ConfigKeyMap,
+  DeviceKeyMap,
+  IndexParamsKeyMap,
+  StatusKeyMapReverse,
+  GlobalStatusKeyMapReverse,
+  FriendKeyMapReverse,
+  ItemKeyMapReverse,
+  SkillKeyMapReverse,
+  BattleArtsKeyMapReverse,
+  ActivityKeyMapReverse,
+  CurriculumKeyMapReverse,
+  ConfigKeyMapReverse,
+  DeviceKeyMapReverse,
+  IndexParamsKeyMapReverse
 } from '../data/keyMap.js'
 import { getPeriodData } from '../data/periodData.js'
 
@@ -49,23 +66,6 @@ function compressKeys(obj, reverseKeyMap, forwardKeyMap) {
   return result
 }
 
-// 创建反向映射
-const StatusKeyMapReverse = Object.fromEntries(
-  Object.entries(StatusKeyMap).map(([k, v]) => [v, k])
-)
-const GlobalStatusKeyMapReverse = Object.fromEntries(
-  Object.entries(GlobalStatusKeyMap).map(([k, v]) => [v, k])
-)
-const FriendKeyMapReverse = Object.fromEntries(
-  Object.entries(FriendKeyMap).map(([k, v]) => [v, k])
-)
-const ItemKeyMapReverse = Object.fromEntries(
-  Object.entries(ItemKeyMap).map(([k, v]) => [v, k])
-)
-const SkillKeyMapReverse = Object.fromEntries(
-  Object.entries(SkillKeyMap).map(([k, v]) => [v, k])
-)
-
 // 解析存档文件
 export function parseSaveFile(base64Content) {
   try {
@@ -79,13 +79,56 @@ export function parseSaveFile(base64Content) {
       gstatus: expandKeys(rawData.gstatus || {}, GlobalStatusKeyMap),
       friendDataParamList: (rawData.friendDataParamList || []).map(f => expandKeys(f, FriendKeyMap)),
       itemDataParamList: (rawData.itemDataParamList || []).map(i => expandKeys(i, ItemKeyMap)),
-      skillDataParamList: (rawData.skillDataParamList || []).map(s => expandKeys(s, SkillKeyMap))
+      skillDataParamList: (rawData.skillDataParamList || []).map(s => expandKeys(s, SkillKeyMap)),
+      battleArtsDataParamList: (rawData.battleArtsDataParamList || []).map(b => expandKeys(b, BattleArtsKeyMap)),
+      activityDataParamList: (rawData.activityDataParamList || []).map(a => expandKeys(a, ActivityKeyMap)),
+      curriculumDataParamList: (rawData.curriculumDataParamList || []).map(c => expandKeys(c, CurriculumKeyMap))
     }
     
     return normalizeSaveData(data)
   } catch (e) {
     console.error('Parse error:', e)
     throw new Error('存档解析失败：' + e.message)
+  }
+}
+
+// 解析存档索引文件
+export function parseIndexFile(base64Content) {
+  try {
+    const jsonStr = decrypt(base64Content)
+    const rawData = JSON.parse(jsonStr)
+    
+    return {
+      ...rawData,
+      dataList: (rawData.dataList || []).map(p => expandKeys(p, IndexParamsKeyMap))
+    }
+  } catch (e) {
+    console.error('Parse index error:', e)
+    throw new Error('索引解析失败：' + e.message)
+  }
+}
+
+// 解析用户设置文件
+export function parseConfigFile(base64Content) {
+  try {
+    const jsonStr = decrypt(base64Content)
+    const rawData = JSON.parse(jsonStr)
+    return expandKeys(rawData, ConfigKeyMap)
+  } catch (e) {
+    console.error('Parse config error:', e)
+    throw new Error('设置解析失败：' + e.message)
+  }
+}
+
+// 解析设备设置文件
+export function parseDeviceFile(base64Content) {
+  try {
+    const jsonStr = decrypt(base64Content)
+    const rawData = JSON.parse(jsonStr)
+    return expandKeys(rawData, DeviceKeyMap)
+  } catch (e) {
+    console.error('Parse device error:', e)
+    throw new Error('设备设置解析失败：' + e.message)
   }
 }
 
@@ -120,7 +163,10 @@ export function serializeSaveFile(data) {
       gstatus: compressKeys(plain.gstatus, GlobalStatusKeyMapReverse, GlobalStatusKeyMap),
       friendDataParamList: (plain.friendDataParamList || []).map(f => compressKeys(f, FriendKeyMapReverse, FriendKeyMap)),
       itemDataParamList: (plain.itemDataParamList || []).map(i => compressKeys(i, ItemKeyMapReverse, ItemKeyMap)),
-      skillDataParamList: (plain.skillDataParamList || []).map(s => compressKeys(s, SkillKeyMapReverse, SkillKeyMap))
+      skillDataParamList: (plain.skillDataParamList || []).map(s => compressKeys(s, SkillKeyMapReverse, SkillKeyMap)),
+      battleArtsDataParamList: (plain.battleArtsDataParamList || []).map(b => compressKeys(b, BattleArtsKeyMapReverse, BattleArtsKeyMap)),
+      activityDataParamList: (plain.activityDataParamList || []).map(a => compressKeys(a, ActivityKeyMapReverse, ActivityKeyMap)),
+      curriculumDataParamList: (plain.curriculumDataParamList || []).map(c => compressKeys(c, CurriculumKeyMapReverse, CurriculumKeyMap))
     }
     
     const jsonStr = JSON.stringify(rawData)
@@ -128,6 +174,75 @@ export function serializeSaveFile(data) {
   } catch (e) {
     console.error('Serialize error:', e)
     throw new Error('存档序列化失败：' + e.message)
+  }
+}
+
+// 序列化存档索引文件
+export function serializeIndexFile(data) {
+  try {
+    const plain = JSON.parse(JSON.stringify(data))
+    const rawData = {
+      ...plain,
+      dataList: (plain.dataList || []).map(p => compressKeys(p, IndexParamsKeyMapReverse, IndexParamsKeyMap))
+    }
+    const jsonStr = JSON.stringify(rawData)
+    return encrypt(jsonStr)
+  } catch (e) {
+    console.error('Serialize index error:', e)
+    throw new Error('索引序列化失败：' + e.message)
+  }
+}
+
+// 序列化用户设置文件
+export function serializeConfigFile(data) {
+  try {
+    const plain = JSON.parse(JSON.stringify(data))
+    const rawData = compressKeys(plain, ConfigKeyMapReverse, ConfigKeyMap)
+    const jsonStr = JSON.stringify(rawData)
+    return encrypt(jsonStr)
+  } catch (e) {
+    console.error('Serialize config error:', e)
+    throw new Error('设置序列化失败：' + e.message)
+  }
+}
+
+// 序列化设备设置文件
+export function serializeDeviceFile(data) {
+  try {
+    const plain = JSON.parse(JSON.stringify(data))
+    const rawData = compressKeys(plain, DeviceKeyMapReverse, DeviceKeyMap)
+    const jsonStr = JSON.stringify(rawData)
+    return encrypt(jsonStr)
+  } catch (e) {
+    console.error('Serialize device error:', e)
+    throw new Error('设备设置序列化失败：' + e.message)
+  }
+}
+
+// 根据存档数据更新索引条目
+export function buildIndexParamsFromSaveData(saveData, slotId) {
+  const status = saveData.status || {}
+  const gstatus = saveData.gstatus || {}
+  
+  return {
+    isPlaying: true,
+    isNextLoopStart: gstatus.isNextLoopStart || false,
+    saveSlotId: slotId,
+    loopCount: gstatus.loopCount || 1,
+    period: status.period || 0,
+    playerName: gstatus.playerName || '',
+    date: new Date().toISOString(),
+    levelPhysical: status.levelPhysical || 1,
+    levelIntelligence: status.levelIntelligence || 1,
+    levelCharm: status.levelCharm || 1,
+    levelSense: status.levelSense || 1,
+    levelBattle: status.levelBattle || 1,
+    levelArts: status.levelArts || 1,
+    levelMagic: status.levelMagic || 1,
+    acClass: status.acClass || 0,
+    charaFav: -1,
+    location: saveData.location || 0,
+    situation: saveData.situation || 0
   }
 }
 

@@ -82,7 +82,6 @@ export default {
 </script>
 
 <style scoped>
-.editor-section { max-width: 1200px; }
 .section-title {
   margin-bottom: 1.5rem;
   color: #667eea;

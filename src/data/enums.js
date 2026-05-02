@@ -136,3 +136,48 @@ export const LocationTypeReverse = Object.fromEntries(
 export const AcademyClassReverse = Object.fromEntries(
   Object.entries(AcademyClass).map(([k, v]) => [v, parseInt(k)])
 )
+
+// LangType - 语言类型
+export const LangType = {
+  0: '日语',
+  1: '英语',
+  2: '简体中文',
+  3: '繁体中文'
+}
+
+// QualityType - 画质等级
+export const QualityType = {
+  0: '低',
+  1: '中',
+  2: '高'
+}
+
+// ResolutionId -> 分辨率映射
+export const ResolutionMap = {
+  0: '640x480',
+  1: '800x600',
+  2: '1280x720',
+  3: '1600x900',
+  4: '1920x1080',
+  5: '2560x1440'
+}
+
+// BattleArtsCategory - 战斗技能类别
+export const BattleArtsCategory = {
+  0: '攻击',
+  1: '防御',
+  2: '武技',
+  3: '魔法',
+  4: '敌方武技',
+  5: '敌方魔法',
+  6: '反击'
+}
+
+// 反向映射
+export const LangTypeReverse = Object.fromEntries(
+  Object.entries(LangType).map(([k, v]) => [v, parseInt(k)])
+)
+
+export const QualityTypeReverse = Object.fromEntries(
+  Object.entries(QualityType).map(([k, v]) => [v, parseInt(k)])
+)

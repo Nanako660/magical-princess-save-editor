@@ -87,28 +87,10 @@ export default {
 </script>
 
 <style scoped>
-.editor-section { 
-  width: 100%;
-  max-width: 1200px;
-  height: calc(100vh - 156px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
 .section-title {
   margin-bottom: 1.5rem;
   color: #667eea;
   border-bottom: 2px solid #667eea;
   padding-bottom: 0.5rem;
-}
-.list-controls {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 16px;
-}
-:deep(.skill-name) {
-  font-weight: 600;
-  color: #9c88ff;
 }
 </style>

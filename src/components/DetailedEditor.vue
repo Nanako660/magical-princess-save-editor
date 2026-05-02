@@ -156,13 +156,10 @@ export default {
 </script>
 
 <style scoped>
-.editor-section {
-  max-width: 1200px;
-}
 .section-title {
   margin-bottom: 1.5rem;
-  color: #0EA5E9;
-  border-bottom: 2px solid #0EA5E9;
+  color: #667eea;
+  border-bottom: 2px solid #667eea;
   padding-bottom: 0.5rem;
 }
 </style>

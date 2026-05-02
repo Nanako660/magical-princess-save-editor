@@ -18,7 +18,12 @@ import {
   PeopleOutline,
   BagOutline,
   StarOutline,
-  SyncOutline
+  SyncOutline,
+  SettingsOutline,
+  DesktopOutline,
+  FlashOutline,
+  CalendarOutline,
+  BookOutline
 } from '@vicons/ionicons5'
 
 function renderIcon(icon) {
@@ -42,7 +47,12 @@ export default {
       { key: 'npc', label: 'NPC', icon: renderIcon(PeopleOutline) },
       { key: 'items', label: '物品', icon: renderIcon(BagOutline) },
       { key: 'skills', label: '技能', icon: renderIcon(StarOutline) },
-      { key: 'global', label: '轮回数据', icon: renderIcon(SyncOutline) }
+      { key: 'global', label: '轮回数据', icon: renderIcon(SyncOutline) },
+      { key: 'battlearts', label: '战斗技能', icon: renderIcon(FlashOutline) },
+      { key: 'activity', label: '活动', icon: renderIcon(CalendarOutline) },
+      { key: 'curriculum', label: '课程', icon: renderIcon(BookOutline) },
+      { key: 'config', label: '用户设置', icon: renderIcon(SettingsOutline) },
+      { key: 'device', label: '设备设置', icon: renderIcon(DesktopOutline) }
     ]
     
     const handleUpdateValue = (key) => {

@@ -57,11 +57,11 @@
             </div>
             <div class="form-group">
               <label>善行值</label>
-              <input type="number" v-model.number="saveData.status.goodAction" min="0" max="100">
+              <input type="number" v-model.number="saveData.status.goodAction" min="1">
             </div>
             <div class="form-group">
               <label>恶行值</label>
-              <input type="number" v-model.number="saveData.status.badAction" min="0" max="100">
+              <input type="number" v-model.number="saveData.status.badAction" min="1">
             </div>
             <div class="form-group">
               <label>善恶平衡</label>
@@ -75,11 +75,11 @@
             </div>
             <div class="form-group">
               <label>声望</label>
-              <input type="number" v-model.number="saveData.status.reputation" min="0">
+              <input type="number" v-model.number="saveData.status.reputation" min="0" max="9999">
             </div>
             <div class="form-group">
               <label>技能点</label>
-              <input type="number" v-model.number="saveData.status.skillPoint" min="0">
+              <input type="number" v-model.number="saveData.status.skillPoint" min="0" max="9999">
             </div>
           </div>
         </section>
@@ -90,23 +90,23 @@
           
           <!-- 四维等级 -->
           <div class="subsection">
-            <h3>四维等级</h3>
+            <h3>四维等级 (1-18)</h3>
             <div class="form-grid">
               <div class="form-group">
                 <label>体力等级</label>
-                <input type="number" v-model.number="saveData.status.levelPhysical" min="1" max="10">
+                <input type="number" v-model.number="saveData.status.levelPhysical" min="1" max="18">
               </div>
               <div class="form-group">
                 <label>智力等级</label>
-                <input type="number" v-model.number="saveData.status.levelIntelligence" min="1" max="10">
+                <input type="number" v-model.number="saveData.status.levelIntelligence" min="1" max="18">
               </div>
               <div class="form-group">
                 <label>魅力等级</label>
-                <input type="number" v-model.number="saveData.status.levelCharm" min="1" max="10">
+                <input type="number" v-model.number="saveData.status.levelCharm" min="1" max="18">
               </div>
               <div class="form-group">
                 <label>感性等级</label>
-                <input type="number" v-model.number="saveData.status.levelSense" min="1" max="10">
+                <input type="number" v-model.number="saveData.status.levelSense" min="1" max="18">
               </div>
             </div>
           </div>
@@ -225,19 +225,19 @@
             <div class="form-grid">
               <div class="form-group">
                 <label>战斗等级</label>
-                <input type="number" v-model.number="saveData.status.levelBattle" min="1" max="10">
+                <input type="number" v-model.number="saveData.status.levelBattle" min="1" max="18">
               </div>
               <div class="form-group">
                 <label>技能等级</label>
-                <input type="number" v-model.number="saveData.status.levelArts" min="1" max="10">
+                <input type="number" v-model.number="saveData.status.levelArts" min="1" max="18">
               </div>
               <div class="form-group">
                 <label>魔法等级</label>
-                <input type="number" v-model.number="saveData.status.levelMagic" min="1" max="10">
+                <input type="number" v-model.number="saveData.status.levelMagic" min="1" max="18">
               </div>
               <div class="form-group">
                 <label>战斗经验</label>
-                <input type="number" v-model.number="saveData.status.btlExp" min="0">
+                <input type="number" v-model.number="saveData.status.btlExp" min="0" max="99999">
               </div>
             </div>
           </div>
@@ -306,7 +306,7 @@
                 </div>
                 <div class="form-group">
                   <label>恋爱事件</label>
-                  <input type="number" v-model.number="npc.fLoveEvents" min="0">
+                  <input type="number" v-model.number="npc.fLoveEvents" min="0" max="4">
                 </div>
               </div>
             </div>

@@ -248,18 +248,27 @@
           <h2>装备</h2>
           <div class="form-grid">
             <div class="form-group">
-              <label>服装ID</label>
-              <input type="number" v-model.number="saveData.status.equipCloth" min="-1">
+              <label>服装</label>
+              <div class="equip-item">
+                <span class="equip-name">{{ getItemName(saveData.status.equipCloth) }}</span>
+                <input type="number" v-model.number="saveData.status.equipCloth" min="-1" class="id-input">
+              </div>
               <span class="hint">-1 = 未装备</span>
             </div>
             <div class="form-group">
-              <label>武器ID</label>
-              <input type="number" v-model.number="saveData.status.equipWeapon" min="-1">
+              <label>武器</label>
+              <div class="equip-item">
+                <span class="equip-name">{{ getItemName(saveData.status.equipWeapon) }}</span>
+                <input type="number" v-model.number="saveData.status.equipWeapon" min="-1" class="id-input">
+              </div>
               <span class="hint">-1 = 未装备</span>
             </div>
             <div class="form-group">
-              <label>防具ID</label>
-              <input type="number" v-model.number="saveData.status.equipArmor" min="-1">
+              <label>防具</label>
+              <div class="equip-item">
+                <span class="equip-name">{{ getItemName(saveData.status.equipArmor) }}</span>
+                <input type="number" v-model.number="saveData.status.equipArmor" min="-1" class="id-input">
+              </div>
               <span class="hint">-1 = 未装备</span>
             </div>
           </div>
@@ -486,7 +495,7 @@
 import { ref, reactive } from 'vue'
 import { parseSaveFile, serializeSaveFile, createEmptySaveData, getPeriodText } from './utils/saveParser.js'
 import { CharaType, AcademyClass } from './data/enums.js'
-import { ItemNames, FriendNames, FriendJobs, SkillNames, BattleArtsNames, ItemCategoryNames } from './data/gameData.js'
+import { ItemNames, FriendNames, FriendJobs, SkillNames, BattleArtsNames, ActivityNames, CurriculumNames } from './data/gameData.js'
 
 export default {
   name: 'App',
@@ -549,11 +558,20 @@ export default {
     }
 
     const getItemName = (id) => {
+      if (id === -1 || id === undefined || id === null) return '未装备'
       return ItemNames[id] || `物品#${id}`
     }
 
     const getSkillName = (id) => {
       return SkillNames[id] || `技能#${id}`
+    }
+
+    const getActivityName = (id) => {
+      return ActivityNames[id] || `活动#${id}`
+    }
+
+    const getCurriculumName = (id) => {
+      return CurriculumNames[id] || `课程#${id}`
     }
 
     const addItem = () => {
@@ -666,6 +684,8 @@ export default {
       getCharaName,
       getItemName,
       getSkillName,
+      getActivityName,
+      getCurriculumName,
       addItem,
       removeItem,
       addSkill,
@@ -676,6 +696,8 @@ export default {
       ItemNames,
       FriendNames,
       SkillNames,
+      ActivityNames,
+      CurriculumNames,
       maxAllStats,
       maxMoney,
       clearStress,
@@ -1060,5 +1082,17 @@ body {
   font-size: 0.75rem !important;
   padding: 0.15rem !important;
   opacity: 0.7;
+}
+
+.equip-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.equip-name {
+  font-weight: 600;
+  color: #9c88ff;
+  font-size: 1rem;
 }
 </style>

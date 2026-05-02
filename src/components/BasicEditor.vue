@@ -91,8 +91,8 @@ export default {
 }
 .section-title {
   margin-bottom: 1.5rem;
-  color: #667eea;
-  border-bottom: 2px solid #667eea;
+  color: #0EA5E9;
+  border-bottom: 2px solid #0EA5E9;
   padding-bottom: 0.5rem;
 }
 </style>

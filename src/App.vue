@@ -276,10 +276,12 @@ html, body, #app {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #5EEAD4 0%, #0EA5E9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   white-space: nowrap;
+  text-shadow: 0 0 20px rgba(94, 234, 212, 0.3);
+  filter: drop-shadow(0 0 10px rgba(14, 165, 233, 0.2));
 }
 
 .header-actions {

@@ -2,7 +2,7 @@
   <div class="setup-guide">
     <n-card class="guide-card" :bordered="true">
       <div class="guide-header">
-        <n-icon size="48" color="#667eea"><GameControllerOutline /></n-icon>
+        <n-icon size="48" color="#0EA5E9"><GameControllerOutline /></n-icon>
         <h2>Magical Princess 存档编辑器</h2>
         <p class="subtitle">首次使用，请先配置存档目录</p>
       </div>
@@ -42,7 +42,8 @@
 
       <n-alert type="info" :bordered="false" style="margin-top: 24px;">
         <template #header>提示</template>
-        配置一次后会自动记忆，下次打开无需重复操作。推荐使用 Chrome 或 Edge 浏览器。
+        <p>将路径复制到资源管理器地址栏，按回车即可快速打开存档文件夹。</p>
+        <p>配置一次后会自动记忆，下次打开无需重复操作。推荐使用 Chrome 或 Edge 浏览器。</p>
       </n-alert>
     </n-card>
   </div>
@@ -98,7 +99,7 @@ export default {
 .guide-header h2 {
   margin: 12px 0 4px;
   font-size: 1.4rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #5EEAD4 0%, #0EA5E9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

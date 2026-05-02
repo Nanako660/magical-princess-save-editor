@@ -6,82 +6,124 @@
       <n-layout-header bordered class="app-header">
         <div class="header-inner">
           <h1>Magical Princess 存档编辑器</h1>
-          <FileHandler
-            :has-data="hasData"
-            :is-loading="isLoading"
-            :file-name="fileName"
-            :dir-ready="dirReady"
-            :dir-name="dirName"
-            :save-slots="saveSlots"
-            @import="handleImport"
-            @export="handleExport"
-            @pick-dir="handlePickDir"
-            @load-slot="handleLoadSlot"
-          />
+
+          <div v-if="dirReady" class="header-actions">
+            <n-popover trigger="click" placement="bottom-end" :show="slotPopoverShow" @update:show="slotPopoverShow = $event">
+              <template #trigger>
+                <n-button quaternary type="info" @click="slotPopoverShow = !slotPopoverShow">
+                  <template #icon><n-icon><FolderOpenOutline /></n-icon></template>
+                  {{ dirName }}
+                  <n-text depth="3" style="margin-left: 4px;">({{ saveSlots.length }})</n-text>
+                </n-button>
+              </template>
+              <n-scrollbar style="max-height: 320px">
+                <div class="slot-list">
+                  <div v-if="saveSlots.length === 0" class="slot-empty">目录中没有找到存档文件</div>
+                  <div
+                    v-for="slot in saveSlots"
+                    :key="slot.slotId"
+                    class="slot-item"
+                    :class="{ active: fileName === slot.name }"
+                    @click="handleLoadSlot(slot)"
+                  >
+                    <span class="slot-name">{{ slot.name }}</span>
+                    <span class="slot-meta">槽位 {{ slot.slotId }} · {{ formatSize(slot.size) }}</span>
+                  </div>
+                </div>
+              </n-scrollbar>
+            </n-popover>
+
+            <n-button v-if="hasData" quaternary type="success" @click="handleSave" :loading="isSaving">
+              <template #icon><n-icon><SaveOutline /></n-icon></template>
+              保存
+            </n-button>
+
+            <n-button v-if="hasData" quaternary @click="handleBack">
+              <template #icon><n-icon><ArrowBackOutline /></n-icon></template>
+              返回
+            </n-button>
+
+            <n-popconfirm @positive-click="handleReset">
+              <template #trigger>
+                <n-button quaternary type="error" size="small">
+                  <template #icon><n-icon><RefreshOutline /></n-icon></template>
+                </n-button>
+              </template>
+              重置目录配置？将清除已保存的存档目录。
+            </n-popconfirm>
+          </div>
         </div>
       </n-layout-header>
 
-      <!-- 有数据时显示主体内容 -->
-      <n-layout has-sider position="absolute" style="top: 72px; bottom: 36px;" v-if="hasData">
-        <n-layout-sider
-          bordered
-          collapse-mode="width"
-          :collapsed-width="64"
-          :width="180"
-          class="app-sider"
-        >
-          <Sidebar 
-            v-model:active-tab="activeTab" 
-            :enabled="hasData"
-          />
-        </n-layout-sider>
-        
-        <n-layout-content 
-          class="app-content" 
-          :native-scrollbar="false"
-          content-style="min-height: 100%; display: flex; flex-direction: column; align-items: center; padding: 24px; box-sizing: border-box;"
-        >
-          <BasicEditor v-if="activeTab === 'basic'" :status="saveData.status" />
-          <DetailedEditor v-if="activeTab === 'detailed'" :status="saveData.status" />
-          <EquipmentEditor v-if="activeTab === 'equipment'" :status="saveData.status" :item-list="saveData.itemDataParamList" />
-          <FriendEditor v-if="activeTab === 'npc'" :friend-list="saveData.friendDataParamList" />
-          <ItemEditor v-if="activeTab === 'items'" :item-list="saveData.itemDataParamList" @update:item-list="saveData.itemDataParamList = $event" />
-          <SkillEditor v-if="activeTab === 'skills'" :skill-list="saveData.skillDataParamList" @update:skill-list="saveData.skillDataParamList = $event" />
-          <GlobalEditor v-if="activeTab === 'global'" :gstatus="saveData.gstatus" />
-          <QuickActions v-if="activeTab === 'quick'" @execute="handleQuickAction" />
+      <!-- 未配置目录：引导页 -->
+      <div v-if="!dirReady" class="setup-wrapper">
+        <SetupGuide :loading="isLoading" @pick-dir="handlePickDir" />
+      </div>
+
+      <!-- 已配置目录但未加载存档：选择提示 -->
+      <n-layout v-else-if="!hasData" position="absolute" style="top: 72px; bottom: 0;">
+        <n-layout-content>
+          <div class="empty-state">
+            <n-empty description="从顶栏选择一个存档开始编辑">
+              <template #extra>
+                <n-text depth="3" style="font-size: 0.85rem;">
+                  点击上方「{{ dirName }}」按钮展开存档列表
+                </n-text>
+              </template>
+            </n-empty>
+          </div>
         </n-layout-content>
       </n-layout>
 
-      <!-- 无数据时显示空状态 -->
-      <n-layout position="absolute" style="top: 72px; bottom: 0;" v-else>
-        <n-layout-content content-style="display: flex; justify-content: center; align-items: center; height: 100%;">
-          <n-result status="info" title="欢迎使用 Magical Princess 存档编辑器" description="点击右上角「导入存档」按钮开始编辑">
-            <template #footer>
-              <div class="hint-text">
-                <p>存档位置：%USERPROFILE%/AppData/LocalLow/Neotro Inc_/MagicalPrincess/</p>
-                <p>存档文件格式：v10_userdata1.dat ~ v10_userdata31.dat</p>
-              </div>
-            </template>
-          </n-result>
-        </n-layout-content>
-      </n-layout>
+      <!-- 已加载存档：编辑器 -->
+      <template v-else>
+        <n-layout has-sider position="absolute" style="top: 72px; bottom: 36px;">
+          <n-layout-sider
+            bordered
+            collapse-mode="width"
+            :collapsed-width="64"
+            :width="180"
+            class="app-sider"
+          >
+            <Sidebar v-model:active-tab="activeTab" :enabled="hasData" />
+          </n-layout-sider>
 
-      <!-- 底栏 -->
-      <n-layout-footer bordered position="absolute" class="app-footer" v-if="hasData">
-        <span>{{ footerText }}</span>
-      </n-layout-footer>
+          <n-layout-content
+            class="app-content"
+            :native-scrollbar="false"
+            content-style="min-height: 100%; display: flex; flex-direction: column; align-items: center; padding: 24px; box-sizing: border-box;"
+          >
+            <BasicEditor v-if="activeTab === 'basic'" :status="saveData.status" />
+            <DetailedEditor v-if="activeTab === 'detailed'" :status="saveData.status" />
+            <EquipmentEditor v-if="activeTab === 'equipment'" :status="saveData.status" :item-list="saveData.itemDataParamList" />
+            <FriendEditor v-if="activeTab === 'npc'" :friend-list="saveData.friendDataParamList" />
+            <ItemEditor v-if="activeTab === 'items'" :item-list="saveData.itemDataParamList" @update:item-list="saveData.itemDataParamList = $event" />
+            <SkillEditor v-if="activeTab === 'skills'" :skill-list="saveData.skillDataParamList" @update:skill-list="saveData.skillDataParamList = $event" />
+            <GlobalEditor v-if="activeTab === 'global'" :gstatus="saveData.gstatus" />
+            <QuickActions v-if="activeTab === 'quick'" @execute="handleQuickAction" />
+          </n-layout-content>
+        </n-layout>
+
+        <n-layout-footer bordered position="absolute" class="app-footer">
+          <span>{{ footerText }}</span>
+        </n-layout-footer>
+      </template>
     </n-layout>
   </n-config-provider>
 </template>
 
 <script>
 import { ref, computed } from 'vue'
-import { NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter, NResult, darkTheme, createDiscreteApi } from 'naive-ui'
+import {
+  NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
+  NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm,
+  darkTheme, createDiscreteApi
+} from 'naive-ui'
+import { FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline } from '@vicons/ionicons5'
 import { useSaveData } from './composables/useSaveData.js'
 import { useQuickActions } from './composables/useQuickActions.js'
 
-// 组件导入
-import FileHandler from './components/FileHandler.vue'
+import SetupGuide from './components/SetupGuide.vue'
 import Sidebar from './components/Sidebar.vue'
 import BasicEditor from './components/BasicEditor.vue'
 import DetailedEditor from './components/DetailedEditor.vue'
@@ -94,28 +136,33 @@ import QuickActions from './components/QuickActions.vue'
 
 export default {
   name: 'App',
-  
+
   components: {
-    NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter, NResult,
-    FileHandler, Sidebar, BasicEditor, DetailedEditor, EquipmentEditor, FriendEditor, ItemEditor, SkillEditor, GlobalEditor, QuickActions
+    NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
+    NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm,
+    FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline,
+    SetupGuide, Sidebar, BasicEditor, DetailedEditor, EquipmentEditor,
+    FriendEditor, ItemEditor, SkillEditor, GlobalEditor, QuickActions
   },
-  
+
   setup() {
     const { message } = createDiscreteApi(['message'], {
       configProviderProps: { theme: darkTheme }
     })
-    
-    const { 
+
+    const {
       saveData, isLoading, fileName, error,
       dirReady, dirName, saveSlots,
-      importSave, pickAndImportSave, pickDir, loadSlot, downloadSave,
-      getMonthText, hasData
+      pickDir, loadSlot, downloadSave,
+      getMonthText, hasData, resetDir
     } = useSaveData()
-    
+
     const { executeAction } = useQuickActions(saveData)
-    
+
     const activeTab = ref('basic')
-    
+    const isSaving = ref(false)
+    const slotPopoverShow = ref(false)
+
     const footerText = computed(() => {
       if (!saveData.value) return ''
       const slot = saveData.value.saveSlotId || 1
@@ -123,25 +170,6 @@ export default {
       const money = saveData.value.status?.money || 0
       return `存档槽位: ${slot} | ${month} | 金钱: ${money}`
     })
-    
-    const handleImport = async (file) => {
-      if (file) {
-        await importSave(file)
-      } else {
-        await pickAndImportSave()
-      }
-      if (!error.value && hasData.value) {
-        activeTab.value = 'basic'
-        message.success('存档导入成功')
-      } else if (error.value) {
-        message.error(`导入失败: ${error.value}`)
-      }
-    }
-    
-    const handleExport = async () => {
-      await downloadSave()
-      message.success('存档已导出')
-    }
 
     const handlePickDir = async () => {
       const ok = await pickDir()
@@ -149,6 +177,7 @@ export default {
     }
 
     const handleLoadSlot = async (slot) => {
+      slotPopoverShow.value = false
       await loadSlot(slot)
       if (!error.value && hasData.value) {
         activeTab.value = 'basic'
@@ -157,19 +186,40 @@ export default {
         message.error(`加载失败: ${error.value}`)
       }
     }
-    
+
+    const handleSave = async () => {
+      isSaving.value = true
+      await downloadSave()
+      isSaving.value = false
+      if (!error.value) message.success('存档已保存')
+    }
+
+    const handleBack = () => {
+      saveData.value = null
+      fileName.value = ''
+    }
+
     const handleQuickAction = (action) => {
       const resultMessage = executeAction(action)
-      if (resultMessage) {
-        message.success(resultMessage)
-      }
+      if (resultMessage) message.success(resultMessage)
     }
-    
+
+    const handleReset = async () => {
+      await resetDir()
+      message.success('目录配置已重置')
+    }
+
+    const formatSize = (bytes) => {
+      if (bytes < 1024) return bytes + ' B'
+      return (bytes / 1024).toFixed(1) + ' KB'
+    }
+
     return {
       darkTheme,
       saveData, isLoading, fileName, activeTab, hasData, footerText,
-      dirReady, dirName, saveSlots,
-      handleImport, handleExport, handlePickDir, handleLoadSlot, handleQuickAction
+      dirReady, dirName, saveSlots, slotPopoverShow, isSaving,
+      handlePickDir, handleLoadSlot, handleSave, handleBack,
+      handleQuickAction, handleReset, formatSize
     }
   }
 }
@@ -204,6 +254,13 @@ html, body, #app {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .app-content :deep(.n-layout-scroll-container) {
@@ -229,13 +286,54 @@ html, body, #app {
   color: #888;
 }
 
-.hint-text {
-  color: #888;
+.slot-list {
+  min-width: 260px;
+}
+.slot-empty {
+  padding: 12px 4px;
+  color: #999;
   font-size: 0.85rem;
   text-align: center;
-  line-height: 1.8;
 }
-.hint-text p {
-  margin: 0;
+.slot-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  gap: 12px;
+  transition: background 0.15s;
+}
+.slot-item:hover {
+  background: rgba(102, 126, 234, 0.15);
+}
+.slot-item.active {
+  background: rgba(102, 126, 234, 0.25);
+}
+.slot-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.slot-meta {
+  font-size: 0.75rem;
+  color: #888;
+  white-space: nowrap;
+}
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 72px);
+}
+.setup-wrapper {
+  position: absolute;
+  top: 72px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

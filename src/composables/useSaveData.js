@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import { parseSaveFile, serializeSaveFile, getPeriodText } from '../utils/saveParser.js'
-import { saveDirHandle, loadDirHandle, verifyPermission } from '../utils/dirStore.js'
+import { saveDirHandle, loadDirHandle, verifyPermission, clearDir } from '../utils/dirStore.js'
 
 const hasFSA = typeof window.showOpenFilePicker === 'function'
 
@@ -177,29 +177,9 @@ export function useSaveData() {
     const result = exportSave()
     if (!result) return
 
-    if (hasFSA && dirHandle) {
-      try {
-        const ok = await writeToFile({ name: result.fileName }, result.content)
-        if (ok) return
-      } catch (e) {
-        console.warn('直接写入失败，尝试选择文件:', e)
-      }
-
-      try {
-        const opts = {
-          suggestedName: result.fileName,
-          types: [{ description: '存档文件', accept: { 'application/octet-stream': ['.dat'] } }],
-          startIn: dirHandle
-        }
-        const handle = await window.showSaveFilePicker(opts)
-        const writable = await handle.createWritable()
-        await writable.write(result.content)
-        await writable.close()
-        return
-      } catch (e) {
-        if (e.name === 'AbortError') return
-        console.warn('FS Access fallback:', e)
-      }
+    if (dirHandle) {
+      const ok = await writeToFile({ name: result.fileName }, result.content)
+      if (ok) return
     }
 
     const blob = new Blob([result.content], { type: 'text/plain' })
@@ -221,6 +201,17 @@ export function useSaveData() {
     error.value = null
   }
 
+  const resetDir = async () => {
+    await clearDir()
+    dirHandle = null
+    dirReady.value = false
+    dirName.value = ''
+    saveSlots.value = []
+    saveData.value = null
+    fileName.value = ''
+    error.value = null
+  }
+
   restoreDir()
 
   return {
@@ -229,6 +220,6 @@ export function useSaveData() {
     importSave, pickAndImportSave,
     pickDir, loadSlot, refreshSlots,
     exportSave, downloadSave,
-    getMonthText, hasData, clearData
+    getMonthText, hasData, clearData, resetDir
   }
 }

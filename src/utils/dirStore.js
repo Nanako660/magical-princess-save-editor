@@ -46,3 +46,12 @@ export async function verifyPermission(handle, readWrite = false) {
   if ((await handle.requestPermission(opts)) === 'granted') return true
   return false
 }
+
+export async function clearDir() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.deleteDatabase(DB_NAME)
+    req.onsuccess = () => resolve()
+    req.onerror = () => reject(req.error)
+    req.onblocked = () => resolve()
+  })
+}

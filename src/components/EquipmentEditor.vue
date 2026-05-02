@@ -1,12 +1,12 @@
 <template>
   <section class="editor-section">
     <h2 class="section-title">装备</h2>
-    <div class="card-grid">
-      <div class="card-grid-item card-grid-item--full">
-        <n-card title="角色装备" size="small">
+    <div class="card-grid equipment-grid">
+      <div class="card-grid-item card-grid-item--wide">
+        <n-card title="角色装备" size="small" class="editor-panel">
           <n-form :model="status" label-placement="top">
-            <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
-              <n-form-item-gi span="24 s:12" label="服装">
+            <n-grid :cols="24" :x-gap="16" :y-gap="10">
+              <n-form-item-gi :span="8" label="服装">
                 <n-select
                   v-model:value="status.equipCloth"
                   :options="clothOptions"
@@ -14,7 +14,7 @@
                   placeholder="选择服装"
                 />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12" label="武器">
+              <n-form-item-gi :span="8" label="武器">
                 <n-select
                   v-model:value="status.equipWeapon"
                   :options="weaponOptions"
@@ -22,7 +22,7 @@
                   placeholder="选择武器"
                 />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12" label="饰品">
+              <n-form-item-gi :span="8" label="饰品">
                 <n-select
                   v-model:value="status.equipArmor"
                   :options="armorOptions"
@@ -85,4 +85,23 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.equipment-grid {
+  gap: 20px;
+}
+
+.editor-panel :deep(.n-card__content) {
+  padding-top: 14px;
+  padding-bottom: 18px;
+}
+
+.editor-panel :deep(.n-form-item-blank) {
+  justify-content: flex-start;
+}
+
+.editor-panel :deep(.n-select) {
+  max-width: 340px;
+}
+</style>
 

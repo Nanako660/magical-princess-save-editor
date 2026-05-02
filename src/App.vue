@@ -33,7 +33,7 @@
               </n-scrollbar>
             </n-popover>
 
-            <n-button v-if="hasData" quaternary type="success" @click="handleSave" :loading="isSaving">
+            <n-button v-if="hasData" quaternary type="success" @click="openSaveModal">
               <template #icon><n-icon><SaveOutline /></n-icon></template>
               保存
             </n-button>
@@ -100,7 +100,7 @@
             <ItemEditor v-if="activeTab === 'items'" :item-list="saveData.itemDataParamList" @update:item-list="saveData.itemDataParamList = $event" />
             <SkillEditor v-if="activeTab === 'skills'" :skill-list="saveData.skillDataParamList" @update:skill-list="saveData.skillDataParamList = $event" />
             <GlobalEditor v-if="activeTab === 'global'" :gstatus="saveData.gstatus" />
-            <QuickActions v-if="activeTab === 'quick'" @execute="handleQuickAction" />
+            <QuickActions v-if="activeTab === 'quick'" @execute="handleQuickAction" @query="handleQuery" />
           </n-layout-content>
         </n-layout>
 
@@ -109,6 +109,17 @@
         </n-layout-footer>
       </template>
     </n-layout>
+
+    <n-modal v-model:show="showSaveModal" preset="dialog" type="info"
+      title="确认保存"
+      :loading="isSaving"
+    >
+      <p style="color: #ccc;">确定要将当前修改保存到 <strong>{{ fileName }}</strong> 吗？</p>
+      <template #action>
+        <n-button type="primary" :loading="isSaving" @click="handleSave">保存</n-button>
+        <n-button @click="showSaveModal = false">取消</n-button>
+      </template>
+    </n-modal>
   </n-config-provider>
 </template>
 
@@ -116,7 +127,7 @@
 import { ref, computed } from 'vue'
 import {
   NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
-  NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm,
+  NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal,
   darkTheme, createDiscreteApi
 } from 'naive-ui'
 import { FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline } from '@vicons/ionicons5'
@@ -139,7 +150,7 @@ export default {
 
   components: {
     NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
-    NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm,
+    NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal,
     FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline,
     SetupGuide, Sidebar, BasicEditor, DetailedEditor, EquipmentEditor,
     FriendEditor, ItemEditor, SkillEditor, GlobalEditor, QuickActions
@@ -157,11 +168,12 @@ export default {
       getMonthText, hasData, resetDir
     } = useSaveData()
 
-    const { executeAction } = useQuickActions(saveData)
+    const { getActionInfo, executeAction } = useQuickActions(saveData)
 
     const activeTab = ref('basic')
     const isSaving = ref(false)
     const slotPopoverShow = ref(false)
+    const showSaveModal = ref(false)
 
     const footerText = computed(() => {
       if (!saveData.value) return ''
@@ -187,11 +199,20 @@ export default {
       }
     }
 
+    const openSaveModal = () => {
+      showSaveModal.value = true
+    }
+
     const handleSave = async () => {
       isSaving.value = true
-      await downloadSave()
+      const ok = await downloadSave()
       isSaving.value = false
-      if (!error.value) message.success('存档已保存')
+      if (ok) {
+        showSaveModal.value = false
+        message.success('存档已保存')
+      } else {
+        message.error(error.value || '保存失败')
+      }
     }
 
     const handleBack = () => {
@@ -199,9 +220,14 @@ export default {
       fileName.value = ''
     }
 
+    const handleQuery = (action, cb) => {
+      const info = getActionInfo(action)
+      if (info) cb(info)
+    }
+
     const handleQuickAction = (action) => {
-      const resultMessage = executeAction(action)
-      if (resultMessage) message.success(resultMessage)
+      const result = executeAction(action)
+      if (result) message.success(result.message)
     }
 
     const handleReset = async () => {
@@ -218,8 +244,9 @@ export default {
       darkTheme,
       saveData, isLoading, fileName, activeTab, hasData, footerText,
       dirReady, dirName, saveSlots, slotPopoverShow, isSaving,
-      handlePickDir, handleLoadSlot, handleSave, handleBack,
-      handleQuickAction, handleReset, formatSize
+      showSaveModal,
+      handlePickDir, handleLoadSlot, openSaveModal, handleSave, handleBack,
+      handleQuery, handleQuickAction, handleReset, formatSize
     }
   }
 }

@@ -175,20 +175,33 @@ export function useSaveData() {
 
   const downloadSave = async () => {
     const result = exportSave()
-    if (!result) return
+    if (!result) return false
 
     if (dirHandle) {
-      const ok = await writeToFile({ name: result.fileName }, result.content)
-      if (ok) return
+      try {
+        const ok = await writeToFile({ name: result.fileName }, result.content)
+        if (ok) return true
+      } catch (e) {
+        error.value = '写入文件失败：' + e.message
+        console.error('writeToFile failed:', e)
+        return false
+      }
     }
 
-    const blob = new Blob([result.content], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = result.fileName
-    a.click()
-    URL.revokeObjectURL(url)
+    try {
+      const blob = new Blob([result.content], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = result.fileName
+      a.click()
+      URL.revokeObjectURL(url)
+      return true
+    } catch (e) {
+      error.value = '导出失败：' + e.message
+      console.error('Download failed:', e)
+      return false
+    }
   }
 
   const getMonthText = (period) => getPeriodText(period)

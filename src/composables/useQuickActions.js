@@ -1,205 +1,153 @@
 import { computed } from 'vue'
 
-/**
- * 快捷操作 Composable
- * 提供一键修改存档数据的功能
- */
 export function useQuickActions(saveData) {
   
-  /**
-   * 一键满属性
-   * 设置所有16项子属性为2000，等级为10
-   */
   const maxAllStats = () => {
-    if (!saveData.value) return
-    
+    if (!saveData.value) return null
     const s = saveData.value.status
-    
-    // 四维等级
-    s.levelPhysical = 10
-    s.levelIntelligence = 10
-    s.levelCharm = 10
-    s.levelSense = 10
-    
-    // 体力子属性
-    s.phyKinryoku = 2000
-    s.phySeimei = 2000
-    s.phyKonjyo = 2000
-    s.phyBinsho = 2000
-    
-    // 智力子属性
-    s.intBungaku = 2000
-    s.intSanjyutsu = 2000
-    s.intMajyutsu = 2000
-    s.intShinkou = 2000
-    
-    // 魅力子属性
-    s.chaBibou = 2000
-    s.chaShakou = 2000
-    s.chaReigi = 2000
-    s.chaDoutoku = 2000
-    
-    // 感性子属性
-    s.senSouzou = 2000
-    s.senSousaku = 2000
-    s.senOnkan = 2000
-    s.senBikan = 2000
-    
-    // 战斗等级
-    s.levelBattle = 10
-    s.levelArts = 10
-    s.levelMagic = 10
-    
-    return '属性已最大化！'
+    s.levelPhysical = 10; s.levelIntelligence = 10; s.levelCharm = 10; s.levelSense = 10
+    s.phyKinryoku = 2000; s.phySeimei = 2000; s.phyKonjyo = 2000; s.phyBinsho = 2000
+    s.intBungaku = 2000; s.intSanjyutsu = 2000; s.intMajyutsu = 2000; s.intShinkou = 2000
+    s.chaBibou = 2000; s.chaShakou = 2000; s.chaReigi = 2000; s.chaDoutoku = 2000
+    s.senSouzou = 2000; s.senSousaku = 2000; s.senOnkan = 2000; s.senBikan = 2000
+    s.levelBattle = 10; s.levelArts = 10; s.levelMagic = 10
+    return {
+      message: '属性已最大化！',
+      fields: ['体力/智力/魅力/感性等级 → 10', '16项子属性 → 2000', '战斗/技能/魔法等级 → 10']
+    }
   }
 
-  /**
-   * 金钱最大化
-   */
   const maxMoney = () => {
-    if (!saveData.value) return
+    if (!saveData.value) return null
     saveData.value.status.money = 9999999
-    return '金钱已最大化！'
+    return { message: '金钱已最大化！', fields: ['金钱 → 9,999,999'] }
   }
 
-  /**
-   * 压力清零
-   */
   const clearStress = () => {
-    if (!saveData.value) return
+    if (!saveData.value) return null
     saveData.value.status.stress = 0
-    return '压力已清零！'
+    return { message: '压力已清零！', fields: ['压力 → 0'] }
   }
 
-  /**
-   * 行动力全满
-   */
   const maxActionPower = () => {
-    if (!saveData.value) return
+    if (!saveData.value) return null
     saveData.value.status.activePower = 99
     saveData.value.status.activePowerMax = 99
-    return '行动力已全满！'
+    return { message: '行动力已全满！', fields: ['行动力 → 99', '行动力上限 → 99'] }
   }
 
-  /**
-   * 全NPC满好感
-   */
   const maxAllFavorability = () => {
-    if (!saveData.value) return
-    
+    if (!saveData.value) return null
     const list = saveData.value.friendDataParamList
-    if (!list || list.length === 0) return '没有NPC数据'
-    
-    list.forEach(npc => {
-      npc.fFavarite = 100
-    })
-    return '全部NPC好感度已最大化！'
+    if (!list || list.length === 0) return { message: '没有NPC数据', fields: [] }
+    list.forEach(npc => { npc.fFavarite = 100 })
+    return { message: '全部NPC好感度已最大化！', fields: [`${list.length}个NPC 好感度 → 100`] }
   }
 
-  /**
-   * 解锁全部技能
-   */
   const unlockAllSkills = () => {
-    if (!saveData.value) return
-    
+    if (!saveData.value) return null
     const list = saveData.value.skillDataParamList
-    if (!list || list.length === 0) return '没有技能数据'
-    
-    list.forEach(skill => {
-      skill.isOpened = true
-      skill.isLearned = true
-    })
-    return '全部技能已解锁！'
+    if (!list || list.length === 0) return { message: '没有技能数据', fields: [] }
+    list.forEach(skill => { skill.isOpened = true; skill.isLearned = true })
+    return { message: '全部技能已解锁！', fields: [`${list.length}个技能 → 已解锁已学习`] }
   }
 
-  /**
-   * 跳到最终月
-   */
   const setMonth42 = () => {
-    if (!saveData.value) return
+    if (!saveData.value) return null
+    const old = saveData.value.status.period
     saveData.value.status.period = 42
-    return '已跳到最终月！'
+    return { message: '已跳到最终月！', fields: [`月份: ${old} → 42`] }
   }
 
-  /**
-   * 重置到初始月
-   */
   const resetToMonth0 = () => {
-    if (!saveData.value) return
+    if (!saveData.value) return null
+    const old = saveData.value.status.period
     saveData.value.status.period = 0
-    return '已重置到初始月！'
+    return { message: '已重置到初始月！', fields: [`月份: ${old} → 0`] }
   }
 
-  /**
-   * 黑币最大化
-   */
   const maxBlackCoin = () => {
-    if (!saveData.value) return
+    if (!saveData.value) return null
     saveData.value.status.blackCoin = 9999
-    return '黑币已最大化！'
+    return { message: '黑币已最大化！', fields: ['黑币 → 9999'] }
   }
 
-  /**
-   * 善行值最大化
-   */
   const maxGoodAction = () => {
-    if (!saveData.value) return
+    if (!saveData.value) return null
     saveData.value.status.goodAction = 100
     saveData.value.status.badAction = 1
     saveData.value.status.gbBalance = 99
-    return '善行值已最大化！'
+    return { message: '善行值已最大化！', fields: ['善行 → 100', '恶行 → 1', '善恶平衡 → 99'] }
   }
 
-  /**
-   * 恶行值最大化
-   */
   const maxBadAction = () => {
-    if (!saveData.value) return
+    if (!saveData.value) return null
     saveData.value.status.goodAction = 1
     saveData.value.status.badAction = 100
     saveData.value.status.gbBalance = 1
-    return '恶行值已最大化！'
+    return { message: '恶行值已最大化！', fields: ['善行 → 1', '恶行 → 100', '善恶平衡 → 1'] }
   }
 
-  /**
-   * 执行快捷操作并返回提示信息
-   */
-  const executeAction = (action) => {
-    const actions = {
-      maxAllStats,
-      maxMoney,
-      clearStress,
-      maxActionPower,
-      maxAllFavorability,
-      unlockAllSkills,
-      setMonth42,
-      resetToMonth0,
-      maxBlackCoin,
-      maxGoodAction,
-      maxBadAction
+  const ACTIONS = {
+    maxAllStats: {
+      label: '一键满属性', fn: maxAllStats,
+      fields: ['体力/智力/魅力/感性等级 → 10', '16项子属性 → 2000', '战斗/技能/魔法等级 → 10']
+    },
+    maxMoney: {
+      label: '金钱最大化', fn: maxMoney,
+      fields: ['金钱 → 9,999,999']
+    },
+    clearStress: {
+      label: '压力清零', fn: clearStress,
+      fields: ['压力 → 0']
+    },
+    maxActionPower: {
+      label: '行动力全满', fn: maxActionPower,
+      fields: ['行动力 → 99', '行动力上限 → 99']
+    },
+    maxAllFavorability: {
+      label: '全NPC满好感', fn: maxAllFavorability,
+      fields: ['全部NPC 好感度 → 100']
+    },
+    unlockAllSkills: {
+      label: '解锁全部技能', fn: unlockAllSkills,
+      fields: ['全部技能 → 已解锁已学习']
+    },
+    setMonth42: {
+      label: '跳到最终月', fn: setMonth42,
+      fields: ['月份 → 42']
+    },
+    resetToMonth0: {
+      label: '重置到初始月', fn: resetToMonth0,
+      fields: ['月份 → 0']
+    },
+    maxBlackCoin: {
+      label: '黑币最大化', fn: maxBlackCoin,
+      fields: ['黑币 → 9999']
+    },
+    maxGoodAction: {
+      label: '善行最大化', fn: maxGoodAction,
+      fields: ['善行 → 100', '恶行 → 1', '善恶平衡 → 99']
+    },
+    maxBadAction: {
+      label: '恶行最大化', fn: maxBadAction,
+      fields: ['善行 → 1', '恶行 → 100', '善恶平衡 → 1']
     }
-    
-    const fn = actions[action]
-    if (!fn) return '未知操作'
-    
-    return fn()
+  }
+
+  const getActionInfo = (action) => {
+    const a = ACTIONS[action]
+    if (!a) return null
+    return { label: a.label, fields: a.fields }
+  }
+
+  const executeAction = (action) => {
+    const info = ACTIONS[action]
+    if (!info) return null
+    return info.fn()
   }
 
   return {
-    // 单个操作
-    maxAllStats,
-    maxMoney,
-    clearStress,
-    maxActionPower,
-    maxAllFavorability,
-    unlockAllSkills,
-    setMonth42,
-    resetToMonth0,
-    maxBlackCoin,
-    maxGoodAction,
-    maxBadAction,
-    
-    // 统一执行接口
-    executeAction
+    getActionInfo, executeAction
   }
 }

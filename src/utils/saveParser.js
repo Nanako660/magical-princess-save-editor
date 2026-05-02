@@ -27,18 +27,20 @@ function expandKeys(obj, keyMap) {
   return result
 }
 
-// 将完整字段名转换为JSON简短键
-function compressKeys(obj, reverseKeyMap) {
+// 将完整字段名转换为JSON简短键（只保留在forwardKeyMap中存在的键）
+function compressKeys(obj, reverseKeyMap, forwardKeyMap) {
   if (!obj || typeof obj !== 'object') return obj
   if (Array.isArray(obj)) {
-    return obj.map(item => compressKeys(item, reverseKeyMap))
+    return obj.map(item => compressKeys(item, reverseKeyMap, forwardKeyMap))
   }
   
+  const validFullKeys = new Set(Object.values(forwardKeyMap))
   const result = {}
   for (const [key, value] of Object.entries(obj)) {
+    if (!validFullKeys.has(key)) continue
     const shortKey = reverseKeyMap[key] || key
     if (typeof value === 'object' && value !== null) {
-      result[shortKey] = compressKeys(value, reverseKeyMap)
+      result[shortKey] = compressKeys(value, reverseKeyMap, forwardKeyMap)
     } else {
       result[shortKey] = value
     }
@@ -107,14 +109,17 @@ function normalizeSaveData(data) {
 // 序列化存档文件
 export function serializeSaveFile(data) {
   try {
-    // 将完整字段名转换回简短键
+    // 深拷贝去除 Vue 响应式 Proxy
+    const plain = JSON.parse(JSON.stringify(data))
+    
+    // 将完整字段名转换回简短键，只保留游戏已知字段
     const rawData = {
-      ...data,
-      status: compressKeys(data.status, StatusKeyMapReverse),
-      gstatus: compressKeys(data.gstatus, GlobalStatusKeyMapReverse),
-      friendDataParamList: data.friendDataParamList.map(f => compressKeys(f, FriendKeyMapReverse)),
-      itemDataParamList: data.itemDataParamList.map(i => compressKeys(i, ItemKeyMapReverse)),
-      skillDataParamList: data.skillDataParamList.map(s => compressKeys(s, SkillKeyMapReverse))
+      ...plain,
+      status: compressKeys(plain.status, StatusKeyMapReverse, StatusKeyMap),
+      gstatus: compressKeys(plain.gstatus, GlobalStatusKeyMapReverse, GlobalStatusKeyMap),
+      friendDataParamList: (plain.friendDataParamList || []).map(f => compressKeys(f, FriendKeyMapReverse, FriendKeyMap)),
+      itemDataParamList: (plain.itemDataParamList || []).map(i => compressKeys(i, ItemKeyMapReverse, ItemKeyMap)),
+      skillDataParamList: (plain.skillDataParamList || []).map(s => compressKeys(s, SkillKeyMapReverse, SkillKeyMap))
     }
     
     const jsonStr = JSON.stringify(rawData)

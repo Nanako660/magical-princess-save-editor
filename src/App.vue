@@ -270,8 +270,6 @@ html, body, #app {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
 .app-header h1 {

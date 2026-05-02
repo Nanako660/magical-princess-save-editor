@@ -130,7 +130,7 @@ export function serializeSaveFile(data) {
   }
 }
 
-// 创建新的存档数据
+// 创建新的存档数据 (从游戏本地化数据同步)
 export function createEmptySaveData() {
   return {
     saveSlotId: 0,
@@ -227,16 +227,16 @@ export function createEmptySaveData() {
   }
 }
 
-// 获取月份显示文本
+// 获取月份显示文本 (从游戏本地化数据同步)
 export function getPeriodText(period) {
   if (period < 0) return '未开始'
-  if (period <= 5) return `童年期 第${period}月`
+  if (period <= 5) return `童年 第${period}月`
   const year = Math.floor((period - 6) / 4) + 1
   const month = ((period - 6) % 4) + 1
-  return `学院期 第${year}年${month}月`
+  return `${year}年级 第${month}月`
 }
 
-// 获取属性分类
+// 获取属性分类 (从游戏本地化数据同步)
 export function getAttributeCategories() {
   return {
     basic: {
@@ -244,27 +244,27 @@ export function getAttributeCategories() {
       fields: ['stress', 'money', 'blackCoin', 'activePower', 'activePowerMax']
     },
     balance: {
-      title: '善恶平衡',
+      title: '善恶',
       fields: ['goodAction', 'badAction', 'gbBalance']
     },
     physical: {
-      title: '体力属性',
+      title: '体力',
       fields: ['levelPhysical', 'valuePhysical', 'phyKinryoku', 'phySeimei', 'phyKonjyo', 'phyBinsho']
     },
     intelligence: {
-      title: '智力属性',
+      title: '智力',
       fields: ['levelIntelligence', 'valueIntelligence', 'intBungaku', 'intSanjyutsu', 'intMajyutsu', 'intShinkou']
     },
     charm: {
-      title: '魅力属性',
+      title: '魅力',
       fields: ['levelCharm', 'valueCharm', 'chaBibou', 'chaShakou', 'chaReigi', 'chaDoutoku']
     },
     sense: {
-      title: '感性属性',
+      title: '感性',
       fields: ['levelSense', 'valueSense', 'senSouzou', 'senSousaku', 'senOnkan', 'senBikan']
     },
     battle: {
-      title: '战斗属性',
+      title: '战斗',
       fields: ['levelBattle', 'levelArts', 'levelMagic', 'btlExp']
     }
   }

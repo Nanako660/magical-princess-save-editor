@@ -13,7 +13,7 @@
             <n-button block @click="confirmAction('maxMoney')" type="warning" ghost>金钱最大化</n-button>
             <n-button block @click="confirmAction('clearStress')" type="warning" ghost>压力清零</n-button>
             <n-button block @click="confirmAction('maxActionPower')" type="warning" ghost>行动力全满</n-button>
-            <n-button block @click="confirmAction('maxBlackCoin')" type="warning" ghost>黑币最大化</n-button>
+            <n-button block @click="confirmAction('maxBlackCoin')" type="warning" ghost>东亚硬币最大化</n-button>
           </n-space>
         </n-card>
       </n-gi>

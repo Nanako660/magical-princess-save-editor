@@ -51,10 +51,10 @@
         <n-gi>
           <n-card title="恋爱状态" size="small">
             <n-space>
-              <n-checkbox v-model:checked="gstatus.isCoupledCrowa">克洛瓦</n-checkbox>
-              <n-checkbox v-model:checked="gstatus.isCoupledChocola">巧克拉</n-checkbox>
+              <n-checkbox v-model:checked="gstatus.isCoupledCrowa">库洛瓦</n-checkbox>
+              <n-checkbox v-model:checked="gstatus.isCoupledChocola">修可拉</n-checkbox>
               <n-checkbox v-model:checked="gstatus.isCoupledFran">弗兰</n-checkbox>
-              <n-checkbox v-model:checked="gstatus.isCoupledCornet">科内特</n-checkbox>
+              <n-checkbox v-model:checked="gstatus.isCoupledCornet">可罗奈</n-checkbox>
               <n-checkbox v-model:checked="gstatus.isCoupledShaile">夏尔</n-checkbox>
               <n-checkbox v-model:checked="gstatus.isCoupledHasis">哈希斯</n-checkbox>
               <n-checkbox v-model:checked="gstatus.isCoupledNoah">诺亚</n-checkbox>

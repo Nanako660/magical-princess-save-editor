@@ -395,6 +395,10 @@ html, body, #app {
   grid-column: span 4;
 }
 
+.card-grid-item--quarter {
+  grid-column: span 3;
+}
+
 .card-grid-item .n-card,
 .card-grid-item > .n-card {
   height: 100%;

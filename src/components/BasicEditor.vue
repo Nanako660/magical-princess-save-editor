@@ -2,7 +2,7 @@
   <section class="editor-section">
     <h2 class="section-title">基础属性</h2>
     <div class="card-grid">
-      <div class="card-grid-item card-grid-item--wide">
+      <div class="card-grid-item card-grid-item--full">
         <n-card title="时间与资源" size="small">
           <n-form :model="status" label-placement="top">
             <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
@@ -56,7 +56,7 @@
         </n-card>
       </div>
 
-      <div class="card-grid-item card-grid-item--third">
+      <div class="card-grid-item card-grid-item--half">
         <n-card title="身份与关系" size="small">
           <n-form :model="status" label-placement="top">
             <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">

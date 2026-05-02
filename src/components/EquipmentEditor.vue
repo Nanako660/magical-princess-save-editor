@@ -1,34 +1,40 @@
 <template>
   <section class="editor-section">
     <h2 class="section-title">装备</h2>
-    <n-form :model="status" label-placement="top">
-      <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
-        <n-form-item-gi span="24 s:12 l:8" label="服装">
-          <n-select
-            v-model:value="status.equipCloth"
-            :options="clothOptions"
-            filterable
-            placeholder="选择服装"
-          />
-        </n-form-item-gi>
-        <n-form-item-gi span="24 s:12 l:8" label="武器">
-          <n-select
-            v-model:value="status.equipWeapon"
-            :options="weaponOptions"
-            filterable
-            placeholder="选择武器"
-          />
-        </n-form-item-gi>
-        <n-form-item-gi span="24 s:12 l:8" label="饰品">
-          <n-select
-            v-model:value="status.equipArmor"
-            :options="armorOptions"
-            filterable
-            placeholder="选择饰品"
-          />
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
+    <div class="card-grid">
+      <div class="card-grid-item card-grid-item--full">
+        <n-card title="角色装备" size="small">
+          <n-form :model="status" label-placement="top">
+            <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
+              <n-form-item-gi span="24 s:12 l:8" label="服装">
+                <n-select
+                  v-model:value="status.equipCloth"
+                  :options="clothOptions"
+                  filterable
+                  placeholder="选择服装"
+                />
+              </n-form-item-gi>
+              <n-form-item-gi span="24 s:12 l:8" label="武器">
+                <n-select
+                  v-model:value="status.equipWeapon"
+                  :options="weaponOptions"
+                  filterable
+                  placeholder="选择武器"
+                />
+              </n-form-item-gi>
+              <n-form-item-gi span="24 s:12 l:8" label="饰品">
+                <n-select
+                  v-model:value="status.equipArmor"
+                  :options="armorOptions"
+                  filterable
+                  placeholder="选择饰品"
+                />
+              </n-form-item-gi>
+            </n-grid>
+          </n-form>
+        </n-card>
+      </div>
+    </div>
   </section>
 </template>
 

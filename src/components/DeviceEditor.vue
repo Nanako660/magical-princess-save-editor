@@ -2,31 +2,35 @@
   <section class="editor-section">
     <h2 class="section-title">设备设置</h2>
     
-    <n-card title="显示设置" size="small">
-      <n-form :model="device" label-placement="top">
-        <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
-          <n-form-item-gi span="24 s:12 m:8 xl:6" label="全屏模式">
-            <n-switch v-model:value="device.isFullScreen" />
-          </n-form-item-gi>
-          <n-form-item-gi span="24 s:12 m:8 xl:6" label="分辨率">
-            <n-select 
-              v-model:value="device.resolutionListId" 
-              :options="resolutionOptions"
-              placeholder="选择分辨率"
-            />
-          </n-form-item-gi>
-          <n-form-item-gi span="24 s:12 m:8 xl:6" label="画质">
-            <n-select 
-              v-model:value="device.qualityListType" 
-              :options="qualityOptions"
-              placeholder="选择画质"
-            />
-          </n-form-item-gi>
-        </n-grid>
-      </n-form>
-    </n-card>
+    <div class="card-grid">
+      <div class="card-grid-item card-grid-item--full">
+        <n-card title="显示设置" size="small">
+          <n-form :model="device" label-placement="top">
+            <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
+              <n-form-item-gi span="24 s:12 m:8 xl:6" label="全屏模式">
+                <n-switch v-model:value="device.isFullScreen" />
+              </n-form-item-gi>
+              <n-form-item-gi span="24 s:12 m:8 xl:6" label="分辨率">
+                <n-select 
+                  v-model:value="device.resolutionListId" 
+                  :options="resolutionOptions"
+                  placeholder="选择分辨率"
+                />
+              </n-form-item-gi>
+              <n-form-item-gi span="24 s:12 m:8 xl:6" label="画质">
+                <n-select 
+                  v-model:value="device.qualityListType" 
+                  :options="qualityOptions"
+                  placeholder="选择画质"
+                />
+              </n-form-item-gi>
+            </n-grid>
+          </n-form>
+        </n-card>
+      </div>
+    </div>
     
-    <n-alert type="info" style="margin-top: 16px;">
+    <n-alert type="info" style="margin-top: 24px;">
       <template #icon>
         <n-icon><InformationCircleOutline /></n-icon>
       </template>

@@ -5,8 +5,8 @@
     <!-- 可攻略NPC -->
     <section class="npc-group">
       <h3 class="group-title">可攻略角色</h3>
-      <n-grid :cols="24" :x-gap="24" :y-gap="24" responsive="screen">
-        <n-gi span="24 s:12 m:8 xl:6" v-for="index in romanceableNPCs" :key="index">
+      <div class="card-grid">
+        <div class="card-grid-item card-grid-item--quarter" v-for="index in romanceableNPCs" :key="index">
           <n-card size="small">
             <template #header>
               <span class="npc-name">{{ getCharaName(friendList[index]?.friendId || index) }}</span>
@@ -35,15 +35,15 @@
               </n-form-item>
             </n-form>
           </n-card>
-        </n-gi>
-      </n-grid>
+        </div>
+      </div>
     </section>
 
     <!-- 其他NPC -->
     <section class="npc-group">
       <h3 class="group-title">其他NPC</h3>
-      <n-grid :cols="24" :x-gap="24" :y-gap="24" responsive="screen">
-        <n-gi span="24 s:12 m:8 xl:6" v-for="index in otherNPCs" :key="index">
+      <div class="card-grid">
+        <div class="card-grid-item card-grid-item--quarter" v-for="index in otherNPCs" :key="index">
           <n-card size="small">
             <template #header>
               <span class="npc-name">{{ getCharaName(friendList[index]?.friendId || index) }}</span>
@@ -69,19 +69,19 @@
               </n-form-item>
             </n-form>
           </n-card>
-        </n-gi>
-      </n-grid>
+        </div>
+      </div>
     </section>
   </section>
 </template>
 
 <script>
-import { NGrid, NGi, NCard, NForm, NFormItem, NInputNumber, NText } from 'naive-ui'
+import { NCard, NForm, NFormItem, NInputNumber, NText } from 'naive-ui'
 import { FriendNames, FriendJobs, RomanceableNPCs } from '../data/gameData.js'
 
 export default {
   name: 'FriendEditor',
-  components: { NGrid, NGi, NCard, NForm, NFormItem, NInputNumber, NText },
+  components: { NCard, NForm, NFormItem, NInputNumber, NText },
   props: { friendList: { type: Array, required: true } },
   setup(props) {
     const getCharaName = (id) => {

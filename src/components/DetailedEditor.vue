@@ -45,7 +45,7 @@
         </n-card>
       </div>
 
-      <div class="card-grid-item card-grid-item--third">
+      <div class="card-grid-item card-grid-item--half">
         <n-card title="体力属性" size="small">
           <n-form :model="status" label-placement="top">
             <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
@@ -69,7 +69,7 @@
         </n-card>
       </div>
 
-      <div class="card-grid-item card-grid-item--third">
+      <div class="card-grid-item card-grid-item--half">
         <n-card title="智力属性" size="small">
           <n-form :model="status" label-placement="top">
             <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
@@ -93,7 +93,7 @@
         </n-card>
       </div>
 
-      <div class="card-grid-item card-grid-item--third">
+      <div class="card-grid-item card-grid-item--half">
         <n-card title="魅力属性" size="small">
           <n-form :model="status" label-placement="top">
             <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
@@ -117,7 +117,7 @@
         </n-card>
       </div>
 
-      <div class="card-grid-item card-grid-item--third">
+      <div class="card-grid-item card-grid-item--half">
         <n-card title="感性属性" size="small">
           <n-form :model="status" label-placement="top">
             <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">

@@ -39,6 +39,14 @@ export function useSaveData() {
         mode: 'readwrite',
         startIn: dirHandle || 'desktop'
       })
+      // 验证权限
+      if ((await handle.queryPermission({ mode: 'readwrite' })) !== 'granted') {
+        const perm = await handle.requestPermission({ mode: 'readwrite' })
+        if (perm !== 'granted') {
+          error.value = '需要目录读写权限'
+          return false
+        }
+      }
       dirHandle = handle
       dirName.value = handle.name
       dirReady.value = true
@@ -46,29 +54,42 @@ export function useSaveData() {
       await refreshSlots()
       return true
     } catch (e) {
-      if (e.name !== 'AbortError') console.error('pickDir error:', e)
+      if (e.name !== 'AbortError') {
+        console.error('pickDir error:', e)
+        error.value = '选择目录失败：' + e.message
+      }
       return false
     }
   }
 
   async function refreshSlots() {
-    if (!dirHandle) { saveSlots.value = []; return }
+    if (!dirHandle) {
+      console.log('refreshSlots: no dirHandle')
+      saveSlots.value = []
+      return
+    }
+    console.log('refreshSlots: scanning', dirHandle.name)
     const slots = []
     try {
       for await (const [name, fh] of dirHandle) {
         const m = name.match(SAVE_PATTERN)
         if (m && fh.kind === 'file') {
-          const file = await fh.getFile()
-          slots.push({
-            slotId: parseInt(m[1]),
-            name,
-            size: file.size,
-            lastModified: file.lastModified,
-            handle: fh
-          })
+          try {
+            const file = await fh.getFile()
+            slots.push({
+              slotId: parseInt(m[1]),
+              name,
+              size: file.size,
+              lastModified: file.lastModified,
+              handle: fh
+            })
+          } catch (e) {
+            console.warn('refreshSlots: skip file', name, e)
+          }
         }
       }
       slots.sort((a, b) => a.slotId - b.slotId)
+      console.log('refreshSlots: found', slots.length, 'saves')
     } catch (e) {
       console.error('refreshSlots error:', e)
     }

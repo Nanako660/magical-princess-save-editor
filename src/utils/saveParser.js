@@ -7,6 +7,7 @@ import {
   ItemKeyMap, 
   SkillKeyMap 
 } from '../data/keyMap.js'
+import { getPeriodData } from '../data/periodData.js'
 
 // 将JSON简短键转换为完整字段名
 function expandKeys(obj, keyMap) {
@@ -227,13 +228,23 @@ export function createEmptySaveData() {
   }
 }
 
-// 获取月份显示文本 (从游戏本地化数据同步)
+// 获取月份显示文本 (与游戏逻辑一致)
 export function getPeriodText(period) {
   if (period < 0) return '未开始'
-  if (period <= 5) return `童年 第${period}月`
-  const year = Math.floor((period - 6) / 4) + 1
-  const month = ((period - 6) % 4) + 1
-  return `${year}年级 第${month}月`
+  
+  const data = getPeriodData(period)
+  if (!data) return `未知(${period})`
+  
+  // period=42 是毕业
+  if (period === 42) return '毕业'
+  
+  // 童年期显示"童年 X月"
+  if (data.isChildhood) {
+    return `童年 ${data.month}月`
+  }
+  
+  // 学院期显示"X年级 X月"
+  return `${data.year}年级 ${data.month}月`
 }
 
 // 获取属性分类 (从游戏本地化数据同步)

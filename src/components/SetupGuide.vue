@@ -11,7 +11,7 @@
         <n-step title="找到游戏存档文件夹">
           <div class="step-content">
             <p>游戏存档位于以下路径：</p>
-            <n-code :code="savePath" language="text" class="path-code" />
+            <code class="path-code">{{ savePath }}</code>
             <n-button
               size="tiny"
               quaternary
@@ -50,12 +50,12 @@
 
 <script>
 import { ref } from 'vue'
-import { NCard, NSteps, NStep, NButton, NIcon, NCode, NAlert } from 'naive-ui'
+import { NCard, NSteps, NStep, NButton, NIcon, NAlert } from 'naive-ui'
 import { GameControllerOutline, FolderOpenOutline } from '@vicons/ionicons5'
 
 export default {
   name: 'SetupGuide',
-  components: { NCard, NSteps, NStep, NButton, NIcon, NCode, NAlert, GameControllerOutline, FolderOpenOutline },
+  components: { NCard, NSteps, NStep, NButton, NIcon, NAlert, GameControllerOutline, FolderOpenOutline },
   props: {
     loading: { type: Boolean, default: false }
   },
@@ -116,6 +116,14 @@ export default {
   color: #ccc;
 }
 .path-code {
+  display: block;
   font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-top: 4px;
+  word-break: break-all;
+  font-family: monospace;
 }
 </style>

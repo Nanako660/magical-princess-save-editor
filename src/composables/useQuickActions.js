@@ -10,10 +10,10 @@ export function useQuickActions(saveData) {
     s.intBungaku = 2000; s.intSanjyutsu = 2000; s.intMajyutsu = 2000; s.intShinkou = 2000
     s.chaBibou = 2000; s.chaShakou = 2000; s.chaReigi = 2000; s.chaDoutoku = 2000
     s.senSouzou = 2000; s.senSousaku = 2000; s.senOnkan = 2000; s.senBikan = 2000
-    s.levelBattle = 10; s.levelArts = 10; s.levelMagic = 10
+    s.levelBattle = 10; s.levelArts = 10; s.levelMagic = 10; s.btlExp = 8000
     return {
       message: '属性已最大化！',
-      fields: ['体力/智力/魅力/感性等级 → 10', '16项子属性 → 2000', '战斗/技能/魔法等级 → 10']
+      fields: ['体力/智力/魅力/感性等级 → 10', '16项子属性 → 2000', '战斗/技能/魔法等级 → 10', '战斗经验 → 8000']
     }
   }
 
@@ -33,7 +33,7 @@ export function useQuickActions(saveData) {
     if (!saveData.value) return null
     saveData.value.status.activePower = 99
     saveData.value.status.activePowerMax = 99
-    return { message: '行动力已全满！', fields: ['行动力 → 99', '行动力上限 → 99'] }
+    return { message: '行动力已全满！', fields: ['行动力 → 99', '最大行动力 → 99'] }
   }
 
   const maxAllFavorability = () => {
@@ -69,7 +69,7 @@ export function useQuickActions(saveData) {
   const maxBlackCoin = () => {
     if (!saveData.value) return null
     saveData.value.status.blackCoin = 9999
-    return { message: '黑币已最大化！', fields: ['黑币 → 9999'] }
+    return { message: '东亚硬币已最大化！', fields: ['东亚硬币 → 9999'] }
   }
 
   const maxGoodAction = () => {
@@ -77,7 +77,7 @@ export function useQuickActions(saveData) {
     saveData.value.status.goodAction = 100
     saveData.value.status.badAction = 1
     saveData.value.status.gbBalance = 99
-    return { message: '善行值已最大化！', fields: ['善行 → 100', '恶行 → 1', '善恶平衡 → 99'] }
+    return { message: '善行已最大化！', fields: ['善行 → 100', '恶行 → 1', '善恶 → 99'] }
   }
 
   const maxBadAction = () => {
@@ -85,13 +85,13 @@ export function useQuickActions(saveData) {
     saveData.value.status.goodAction = 1
     saveData.value.status.badAction = 100
     saveData.value.status.gbBalance = 1
-    return { message: '恶行值已最大化！', fields: ['善行 → 1', '恶行 → 100', '善恶平衡 → 1'] }
+    return { message: '恶行已最大化！', fields: ['善行 → 1', '恶行 → 100', '善恶 → 1'] }
   }
 
   const ACTIONS = {
     maxAllStats: {
       label: '一键满属性', fn: maxAllStats,
-      fields: ['体力/智力/魅力/感性等级 → 10', '16项子属性 → 2000', '战斗/技能/魔法等级 → 10']
+      fields: ['体力/智力/魅力/感性等级 → 10', '16项子属性 → 2000', '战斗/技能/魔法等级 → 10', '战斗经验 → 8000']
     },
     maxMoney: {
       label: '金钱最大化', fn: maxMoney,
@@ -103,7 +103,7 @@ export function useQuickActions(saveData) {
     },
     maxActionPower: {
       label: '行动力全满', fn: maxActionPower,
-      fields: ['行动力 → 99', '行动力上限 → 99']
+      fields: ['行动力 → 99', '最大行动力 → 99']
     },
     maxAllFavorability: {
       label: '全NPC满好感', fn: maxAllFavorability,
@@ -122,16 +122,16 @@ export function useQuickActions(saveData) {
       fields: ['月份 → 0']
     },
     maxBlackCoin: {
-      label: '黑币最大化', fn: maxBlackCoin,
-      fields: ['黑币 → 9999']
+      label: '东亚硬币最大化', fn: maxBlackCoin,
+      fields: ['东亚硬币 → 9999']
     },
     maxGoodAction: {
       label: '善行最大化', fn: maxGoodAction,
-      fields: ['善行 → 100', '恶行 → 1', '善恶平衡 → 99']
+      fields: ['善行 → 100', '恶行 → 1', '善恶 → 99']
     },
     maxBadAction: {
       label: '恶行最大化', fn: maxBadAction,
-      fields: ['善行 → 1', '恶行 → 100', '善恶平衡 → 1']
+      fields: ['善行 → 1', '恶行 → 100', '善恶 → 1']
     }
   }
 

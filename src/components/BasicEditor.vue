@@ -15,7 +15,7 @@
         <n-form-item-gi :span="6" label="金钱">
           <n-input-number v-model:value="status.money" :min="0" :max="9999999" />
         </n-form-item-gi>
-        <n-form-item-gi :span="6" label="黑币">
+        <n-form-item-gi :span="6" label="东亚硬币">
           <n-input-number v-model:value="status.blackCoin" :min="0" :max="9999" />
         </n-form-item-gi>
         
@@ -60,7 +60,7 @@
 import { computed } from 'vue'
 import { NForm, NGrid, NFormItemGi, NInputNumber, NSelect, NInputGroup, NInputGroupLabel } from 'naive-ui'
 import { AcademyClass } from '../data/enums.js'
-import { getPeriodText } from '../utils/saveParser.js'
+import { getPeriodText } from '../data/periodData.js'
 
 export default {
   name: 'BasicEditor',

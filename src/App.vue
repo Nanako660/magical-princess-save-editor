@@ -96,21 +96,23 @@
           <n-layout-content
             class="app-content"
             :native-scrollbar="false"
-            content-style="min-height: 100%; display: flex; flex-direction: column; align-items: center; padding: 24px; box-sizing: border-box;"
+            content-style="min-height: 100%; box-sizing: border-box;"
           >
-            <BasicEditor v-if="activeTab === 'basic'" :status="saveData.status" />
-            <DetailedEditor v-if="activeTab === 'detailed'" :status="saveData.status" />
-            <EquipmentEditor v-if="activeTab === 'equipment'" :status="saveData.status" :item-list="saveData.itemDataParamList" />
-            <FriendEditor v-if="activeTab === 'npc'" :friend-list="saveData.friendDataParamList" />
-            <ItemEditor v-if="activeTab === 'items'" :item-list="saveData.itemDataParamList" @update:item-list="saveData.itemDataParamList = $event" />
-            <SkillEditor v-if="activeTab === 'skills'" :skill-list="saveData.skillDataParamList" @update:skill-list="saveData.skillDataParamList = $event" />
-            <GlobalEditor v-if="activeTab === 'global'" :gstatus="saveData.gstatus" />
-            <QuickActions v-if="activeTab === 'quick'" @execute="handleQuickAction" @query="handleQuery" />
-            <BattleArtsEditor v-if="activeTab === 'battlearts'" :arts-list="saveData.battleArtsDataParamList" @update:arts-list="saveData.battleArtsDataParamList = $event" />
-            <ActivityEditor v-if="activeTab === 'activity'" :activity-list="saveData.activityDataParamList" @update:activity-list="saveData.activityDataParamList = $event" />
-            <CurriculumEditor v-if="activeTab === 'curriculum'" :curriculum-list="saveData.curriculumDataParamList" @update:curriculum-list="saveData.curriculumDataParamList = $event" />
-            <ConfigEditor v-if="activeTab === 'config' && configData" :config="configData" />
-            <DeviceEditor v-if="activeTab === 'device' && deviceData" :device="deviceData" />
+            <div class="content-shell" :class="{ 'content-shell--wide': isWideTab }">
+              <BasicEditor v-if="activeTab === 'basic'" :status="saveData.status" />
+              <DetailedEditor v-if="activeTab === 'detailed'" :status="saveData.status" />
+              <EquipmentEditor v-if="activeTab === 'equipment'" :status="saveData.status" :item-list="saveData.itemDataParamList" />
+              <FriendEditor v-if="activeTab === 'npc'" :friend-list="saveData.friendDataParamList" />
+              <ItemEditor v-if="activeTab === 'items'" :item-list="saveData.itemDataParamList" @update:item-list="saveData.itemDataParamList = $event" />
+              <SkillEditor v-if="activeTab === 'skills'" :skill-list="saveData.skillDataParamList" @update:skill-list="saveData.skillDataParamList = $event" />
+              <GlobalEditor v-if="activeTab === 'global'" :gstatus="saveData.gstatus" />
+              <QuickActions v-if="activeTab === 'quick'" @execute="handleQuickAction" @query="handleQuery" />
+              <BattleArtsEditor v-if="activeTab === 'battlearts'" :arts-list="saveData.battleArtsDataParamList" @update:arts-list="saveData.battleArtsDataParamList = $event" />
+              <ActivityEditor v-if="activeTab === 'activity'" :activity-list="saveData.activityDataParamList" @update:activity-list="saveData.activityDataParamList = $event" />
+              <CurriculumEditor v-if="activeTab === 'curriculum'" :curriculum-list="saveData.curriculumDataParamList" @update:curriculum-list="saveData.curriculumDataParamList = $event" />
+              <ConfigEditor v-if="activeTab === 'config' && configData" :config="configData" />
+              <DeviceEditor v-if="activeTab === 'device' && deviceData" :device="deviceData" />
+            </div>
           </n-layout-content>
         </n-layout>
 
@@ -196,6 +198,7 @@ export default {
     const isSaving = ref(false)
     const slotPopoverShow = ref(false)
     const showSaveModal = ref(false)
+    const wideTabs = new Set(['items', 'skills', 'battlearts', 'activity', 'curriculum'])
 
     const footerText = computed(() => {
       if (!saveData.value) return ''
@@ -209,6 +212,7 @@ export default {
     })
 
     const appVersion = __APP_VERSION__
+    const isWideTab = computed(() => wideTabs.has(activeTab.value))
 
     const handlePickDir = async () => {
       const ok = await pickDir()
@@ -269,7 +273,7 @@ export default {
 
     return {
       darkTheme, logoSrc, appVersion,
-      saveData, isLoading, fileName, activeTab, hasData, footerText,
+      saveData, isLoading, fileName, activeTab, hasData, footerText, isWideTab,
       dirReady, dirName, saveSlots, slotPopoverShow, isSaving,
       showSaveModal,
       indexData, configData, deviceData,
@@ -337,31 +341,192 @@ html, body, #app {
   align-items: center;
 }
 
-.app-content :deep(.n-layout-scroll-container) {
-  display: flex;
-  flex-direction: column;
-  padding: 24px 32px;
+.app-content {
+  --page-max-width: 1280px;
+  --page-max-width-wide: 1360px;
+  --page-gutter: 24px;
+}
+
+.content-shell {
+  width: min(var(--page-max-width), calc(100% - (var(--page-gutter) * 2)));
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 24px 0 32px;
   box-sizing: border-box;
 }
 
-.app-content :deep(.editor-section) {
+.content-shell--wide {
+  width: min(var(--page-max-width-wide), calc(100% - (var(--page-gutter) * 2)));
+  height: 100%;
+  padding-bottom: 24px;
+  overflow: hidden;
+}
+
+.editor-section {
   width: 100%;
-  max-width: 1600px;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
-/* 响应式：小屏幕自动适配 */
-@media (max-width: 1600px) {
-  .app-content :deep(.editor-section) {
-    max-width: calc(100% - 16px);
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.card-grid-item {
+  min-width: 0;
+}
+
+.card-grid-item--full {
+  grid-column: span 12;
+}
+
+.card-grid-item--wide {
+  grid-column: span 8;
+}
+
+.card-grid-item--half {
+  grid-column: span 6;
+}
+
+.card-grid-item--third {
+  grid-column: span 4;
+}
+
+.card-grid-item .n-card,
+.card-grid-item > .n-card {
+  height: 100%;
+}
+
+.card-grid-item .n-form,
+.card-grid-item .n-grid {
+  min-width: 0;
+}
+
+.section-title {
+  margin: 0 0 1.5rem;
+  color: #667eea;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 0.5rem;
+}
+
+.page-table .list-controls {
+  margin-bottom: 12px;
+}
+
+.page-table {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-table .n-card:last-child,
+.page-table .table-panel {
+  flex: 1;
+  min-height: 0;
+}
+
+.page-table .table-scroll-shell {
+  height: 100%;
+  min-height: 0;
+}
+
+.page-table .n-card__content {
+  min-height: 0;
+}
+
+.content-shell .n-card + .n-card,
+.content-shell .npc-group + .npc-group,
+.content-shell .item-group + .item-group {
+  margin-top: 24px;
+}
+
+.content-shell .n-form {
+  margin: 0;
+  padding: 0;
+}
+
+.content-shell .n-grid,
+.content-shell .n-space {
+  width: 100%;
+}
+
+.content-shell .n-space {
+  flex-wrap: wrap;
+}
+
+.content-shell .n-form-item {
+  min-width: 0;
+}
+
+.content-shell .n-input-number,
+.content-shell .n-select,
+.content-shell .n-slider {
+  width: 100%;
+}
+
+.content-shell .n-input-group .n-input-number {
+  width: auto;
+}
+
+.content-shell .n-table-wrapper,
+.content-shell .n-table,
+.content-shell .n-data-table-wrapper,
+.content-shell .n-data-table {
+  width: 100%;
+}
+
+.content-shell .n-alert {
+  width: 100%;
+}
+
+.page-table .n-table {
+  table-layout: fixed;
+}
+
+.page-table .n-table th,
+.page-table .n-table td {
+  white-space: normal;
+  word-break: break-word;
+}
+
+@media (max-width: 900px) {
+  .app-content {
+    --page-gutter: 16px;
+  }
+
+  .content-shell {
+    padding-top: 20px;
+  }
+
+  .card-grid {
+    gap: 20px;
+  }
+
+  .card-grid-item--wide,
+  .card-grid-item--half,
+  .card-grid-item--third {
+    grid-column: span 6;
   }
 }
 
-@media (max-width: 1200px) {
-  .app-content :deep(.n-layout-scroll-container) {
-    padding: 24px 16px;
+@media (max-width: 640px) {
+  .app-content {
+    --page-gutter: 12px;
   }
-  .app-content :deep(.editor-section) {
-    max-width: calc(100% - 8px);
+
+  .card-grid {
+    gap: 16px;
+  }
+
+  .card-grid-item--wide,
+  .card-grid-item--half,
+  .card-grid-item--third,
+  .card-grid-item--full {
+    grid-column: span 12;
   }
 }
 

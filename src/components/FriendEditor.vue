@@ -3,10 +3,10 @@
     <h2 class="section-title">NPC好感度</h2>
     
     <!-- 可攻略NPC -->
-    <div class="npc-group">
+    <section class="npc-group">
       <h3 class="group-title">可攻略角色</h3>
       <n-grid :cols="24" :x-gap="24" :y-gap="24" responsive="screen">
-        <n-gi :span="8" v-for="index in romanceableNPCs" :key="index">
+        <n-gi span="24 s:12 m:8 xl:6" v-for="index in romanceableNPCs" :key="index">
           <n-card size="small">
             <template #header>
               <span class="npc-name">{{ getCharaName(friendList[index]?.friendId || index) }}</span>
@@ -37,13 +37,13 @@
           </n-card>
         </n-gi>
       </n-grid>
-    </div>
+    </section>
 
     <!-- 其他NPC -->
-    <div class="npc-group">
+    <section class="npc-group">
       <h3 class="group-title">其他NPC</h3>
       <n-grid :cols="24" :x-gap="24" :y-gap="24" responsive="screen">
-        <n-gi :span="8" v-for="index in otherNPCs" :key="index">
+        <n-gi span="24 s:12 m:8 xl:6" v-for="index in otherNPCs" :key="index">
           <n-card size="small">
             <template #header>
               <span class="npc-name">{{ getCharaName(friendList[index]?.friendId || index) }}</span>
@@ -71,7 +71,7 @@
           </n-card>
         </n-gi>
       </n-grid>
-    </div>
+    </section>
   </section>
 </template>
 
@@ -100,16 +100,18 @@ export default {
 </script>
 
 <style scoped>
-.section-title {
-  margin-bottom: 1.5rem;
-  color: #667eea;
-  border-bottom: 2px solid #667eea;
-  padding-bottom: 0.5rem;
+.npc-group + .npc-group {
+  margin-top: 28px;
 }
-.friend-card {
-  margin-bottom: 1rem;
+
+.group-title {
+  margin: 0 0 1rem;
+  color: #9ca3af;
+  font-size: 1rem;
+  font-weight: 600;
 }
-.friend-card :deep(.n-card-header) {
-  padding-left: 0.5rem;
+
+.npc-name {
+  font-weight: 600;
 }
 </style>

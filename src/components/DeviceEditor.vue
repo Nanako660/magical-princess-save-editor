@@ -2,25 +2,27 @@
   <section class="editor-section">
     <h2 class="section-title">设备设置</h2>
     
-    <n-card title="显示设置" size="small" style="margin-bottom: 16px;">
-      <n-form :model="device" label-placement="left" label-width="100">
-        <n-form-item label="全屏模式">
-          <n-switch v-model:value="device.isFullScreen" />
-        </n-form-item>
-        <n-form-item label="分辨率">
-          <n-select 
-            v-model:value="device.resolutionListId" 
-            :options="resolutionOptions"
-            placeholder="选择分辨率"
-          />
-        </n-form-item>
-        <n-form-item label="画质">
-          <n-select 
-            v-model:value="device.qualityListType" 
-            :options="qualityOptions"
-            placeholder="选择画质"
-          />
-        </n-form-item>
+    <n-card title="显示设置" size="small">
+      <n-form :model="device" label-placement="top">
+        <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
+          <n-form-item-gi span="24 s:12 m:8 xl:6" label="全屏模式">
+            <n-switch v-model:value="device.isFullScreen" />
+          </n-form-item-gi>
+          <n-form-item-gi span="24 s:12 m:8 xl:6" label="分辨率">
+            <n-select 
+              v-model:value="device.resolutionListId" 
+              :options="resolutionOptions"
+              placeholder="选择分辨率"
+            />
+          </n-form-item-gi>
+          <n-form-item-gi span="24 s:12 m:8 xl:6" label="画质">
+            <n-select 
+              v-model:value="device.qualityListType" 
+              :options="qualityOptions"
+              placeholder="选择画质"
+            />
+          </n-form-item-gi>
+        </n-grid>
       </n-form>
     </n-card>
     
@@ -35,13 +37,13 @@
 
 <script>
 import { computed } from 'vue'
-import { NCard, NForm, NFormItem, NSelect, NSwitch, NAlert, NIcon } from 'naive-ui'
+import { NCard, NForm, NGrid, NFormItemGi, NSelect, NSwitch, NAlert, NIcon } from 'naive-ui'
 import { InformationCircleOutline } from '@vicons/ionicons5'
 import { QualityType, ResolutionMap } from '../data/enums.js'
 
 export default {
   name: 'DeviceEditor',
-  components: { NCard, NForm, NFormItem, NSelect, NSwitch, NAlert, NIcon, InformationCircleOutline },
+  components: { NCard, NForm, NGrid, NFormItemGi, NSelect, NSwitch, NAlert, NIcon, InformationCircleOutline },
   props: {
     device: { type: Object, required: true }
   },
@@ -64,12 +66,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.section-title {
-  margin-bottom: 1.5rem;
-  color: #667eea;
-  border-bottom: 2px solid #667eea;
-  padding-bottom: 0.5rem;
-}
-</style>

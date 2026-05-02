@@ -1,5 +1,5 @@
 <template>
-  <section class="editor-section">
+  <section class="editor-section page-table">
     <h2 class="section-title">战斗技能</h2>
     
     <n-card title="快捷操作" size="small" style="margin-bottom: 16px;">
@@ -10,13 +10,13 @@
     </n-card>
     
     <n-card title="技能列表" size="small">
-      <n-scrollbar style="max-height: 500px;">
+      <n-scrollbar class="table-scroll-shell" :style="{ maxHeight: `${tableHeight}px` }">
         <n-table :bordered="false" :single-line="false" size="small">
           <thead>
             <tr>
-              <th style="width: 60px;">ID</th>
-              <th style="width: 180px;">技能名称</th>
-              <th style="width: 100px;">已学习</th>
+              <th>ID</th>
+              <th>技能名称</th>
+              <th>已学习</th>
             </tr>
           </thead>
           <tbody>
@@ -38,6 +38,7 @@
 import { computed } from 'vue'
 import { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch } from 'naive-ui'
 import { BattleArtsNames } from '../data/gameData.js'
+import { useViewportTableHeight } from '../composables/useViewportTableHeight.js'
 
 export default {
   name: 'BattleArtsEditor',
@@ -47,6 +48,7 @@ export default {
   },
   emits: ['update:artsList'],
   setup(props, { emit }) {
+    const { tableHeight } = useViewportTableHeight(320, 360)
     const sortedArts = computed(() => {
       return [...props.artsList].sort((a, b) => a.battleArtsId - b.battleArtsId)
     })
@@ -71,16 +73,7 @@ export default {
       emit('update:artsList', updated)
     }
     
-    return { sortedArts, getArtsName, learnAllArts, resetAllArts }
+    return { sortedArts, getArtsName, learnAllArts, resetAllArts, tableHeight }
   }
 }
 </script>
-
-<style scoped>
-.section-title {
-  margin-bottom: 1.5rem;
-  color: #667eea;
-  border-bottom: 2px solid #667eea;
-  padding-bottom: 0.5rem;
-}
-</style>

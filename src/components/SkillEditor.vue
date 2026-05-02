@@ -1,49 +1,41 @@
 <template>
-  <section class="editor-section">
+  <section class="editor-section page-table">
     <h2 class="section-title">技能列表</h2>
     <div class="list-controls">
       <n-text depth="3" class="skill-count">共 {{ skillList.length }} 个技能</n-text>
     </div>
     
-    <n-data-table
-      :columns="columns"
-      :data="isMounting ? [] : skillList"
-      :loading="isMounting"
-      :max-height="tableHeight"
-      size="small"
-      :row-key="(row, index) => index"
-    />
+    <n-card title="技能列表" size="small" class="table-panel">
+      <n-data-table
+        :columns="columns"
+        :data="isMounting ? [] : skillList"
+        :loading="isMounting"
+        :max-height="tableHeight"
+        size="small"
+        :row-key="(row, index) => index"
+      />
+    </n-card>
   </section>
 </template>
 
 <script>
-import { h, computed, ref, onMounted, onUnmounted } from 'vue'
-import { NText, NDataTable, NCheckbox } from 'naive-ui'
+import { h, computed, ref, onMounted } from 'vue'
+import { NText, NDataTable, NCheckbox, NCard } from 'naive-ui'
 import { SkillNames } from '../data/gameData.js'
+import { useViewportTableHeight } from '../composables/useViewportTableHeight.js'
 
 export default {
   name: 'SkillEditor',
-  components: { NText, NDataTable },
+  components: { NText, NDataTable, NCard },
   props: { skillList: { type: Array, required: true } },
   setup() {
-    const tableHeight = ref(600)
+    const { tableHeight } = useViewportTableHeight(280, 360)
     const isMounting = ref(true)
-    
-    const updateHeight = () => {
-      tableHeight.value = window.innerHeight - 250
-    }
 
     onMounted(() => {
-      updateHeight()
-      window.addEventListener('resize', updateHeight)
-      
       setTimeout(() => {
         isMounting.value = false
       }, 50)
-    })
-
-    onUnmounted(() => {
-      window.removeEventListener('resize', updateHeight)
     })
 
     const getSkillName = (id) => SkillNames[id] || `技能#${id}`
@@ -52,7 +44,7 @@ export default {
       {
         title: '技能名称 (ID)',
         key: 'name',
-        width: 350,
+        minWidth: 220,
         render(row) {
           return h('span', { class: 'skill-name' }, `${getSkillName(row.skillId)} (#${row.skillId})`)
         }
@@ -60,7 +52,7 @@ export default {
       {
         title: '已解锁',
         key: 'isOpened',
-        width: 150,
+        width: 96,
         render(row) {
           return h(NCheckbox, {
             checked: row.isOpened,
@@ -71,7 +63,7 @@ export default {
       {
         title: '已学习',
         key: 'isLearned',
-        width: 150,
+        width: 96,
         render(row) {
           return h(NCheckbox, {
             checked: row.isLearned,
@@ -86,11 +78,3 @@ export default {
 }
 </script>
 
-<style scoped>
-.section-title {
-  margin-bottom: 1.5rem;
-  color: #667eea;
-  border-bottom: 2px solid #667eea;
-  padding-bottom: 0.5rem;
-}
-</style>

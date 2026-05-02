@@ -1,19 +1,19 @@
 <template>
-  <section class="editor-section">
+  <section class="editor-section page-table">
     <h2 class="section-title">活动数据</h2>
     
     <n-card title="活动列表" size="small">
-      <n-scrollbar style="max-height: 600px;">
+      <n-scrollbar class="table-scroll-shell" :style="{ maxHeight: `${tableHeight}px` }">
         <n-table :bordered="false" :single-line="false" size="small">
           <thead>
             <tr>
-              <th style="width: 60px;">ID</th>
-              <th style="width: 150px;">活动名称</th>
-              <th style="width: 60px;">等级</th>
-              <th style="width: 80px;">总次数</th>
-              <th style="width: 80px;">本月次数</th>
-              <th style="width: 80px;">失败次数</th>
-              <th style="width: 80px;">伤害次数</th>
+              <th style="width: 56px;">ID</th>
+              <th>活动名称</th>
+              <th style="width: 92px;">等级</th>
+              <th style="width: 92px;">总次数</th>
+              <th style="width: 92px;">本月次数</th>
+              <th style="width: 92px;">失败次数</th>
+              <th style="width: 92px;">伤害次数</th>
             </tr>
           </thead>
           <tbody>
@@ -26,7 +26,6 @@
                   :min="0" 
                   :max="10"
                   size="small"
-                  style="width: 60px;"
                 />
               </td>
               <td>
@@ -34,7 +33,6 @@
                   v-model:value="activity.eventCount" 
                   :min="0"
                   size="small"
-                  style="width: 70px;"
                 />
               </td>
               <td>
@@ -42,7 +40,6 @@
                   v-model:value="activity.eventCountMonth" 
                   :min="0"
                   size="small"
-                  style="width: 70px;"
                 />
               </td>
               <td>
@@ -50,7 +47,6 @@
                   v-model:value="activity.badCount" 
                   :min="0"
                   size="small"
-                  style="width: 70px;"
                 />
               </td>
               <td>
@@ -58,7 +54,6 @@
                   v-model:value="activity.damageCount" 
                   :min="0"
                   size="small"
-                  style="width: 70px;"
                 />
               </td>
             </tr>
@@ -73,6 +68,7 @@
 import { computed } from 'vue'
 import { NCard, NScrollbar, NTable, NInputNumber } from 'naive-ui'
 import { ActivityNames } from '../data/gameData.js'
+import { useViewportTableHeight } from '../composables/useViewportTableHeight.js'
 
 export default {
   name: 'ActivityEditor',
@@ -82,6 +78,7 @@ export default {
   },
   emits: ['update:activityList'],
   setup(props) {
+    const { tableHeight } = useViewportTableHeight(280, 360)
     const sortedActivities = computed(() => {
       return [...props.activityList].sort((a, b) => a.activityID - b.activityID)
     })
@@ -90,16 +87,7 @@ export default {
       return ActivityNames[id] || `未知活动(${id})`
     }
     
-    return { sortedActivities, getActivityName }
+    return { sortedActivities, getActivityName, tableHeight }
   }
 }
 </script>
-
-<style scoped>
-.section-title {
-  margin-bottom: 1.5rem;
-  color: #667eea;
-  border-bottom: 2px solid #667eea;
-  padding-bottom: 0.5rem;
-}
-</style>

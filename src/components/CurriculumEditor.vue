@@ -1,5 +1,5 @@
 <template>
-  <section class="editor-section">
+  <section class="editor-section page-table">
     <h2 class="section-title">课程数据</h2>
     
     <n-card title="快捷操作" size="small" style="margin-bottom: 16px;">
@@ -10,15 +10,15 @@
     </n-card>
     
     <n-card title="课程列表" size="small">
-      <n-scrollbar style="max-height: 600px;">
+      <n-scrollbar class="table-scroll-shell" :style="{ maxHeight: `${tableHeight}px` }">
         <n-table :bordered="false" :single-line="false" size="small">
           <thead>
             <tr>
-              <th style="width: 60px;">ID</th>
-              <th style="width: 200px;">课程名称</th>
-              <th style="width: 80px;">激活</th>
-              <th style="width: 80px;">完成</th>
-              <th style="width: 100px;">剩余耐力</th>
+              <th style="width: 56px;">ID</th>
+              <th>课程名称</th>
+              <th style="width: 88px;">激活</th>
+              <th style="width: 88px;">完成</th>
+              <th style="width: 110px;">剩余耐力</th>
             </tr>
           </thead>
           <tbody>
@@ -36,7 +36,6 @@
                   v-model:value="curriculum.restHP" 
                   :min="0"
                   size="small"
-                  style="width: 80px;"
                 />
               </td>
             </tr>
@@ -51,6 +50,7 @@
 import { computed } from 'vue'
 import { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch, NInputNumber } from 'naive-ui'
 import { CurriculumNames } from '../data/gameData.js'
+import { useViewportTableHeight } from '../composables/useViewportTableHeight.js'
 
 export default {
   name: 'CurriculumEditor',
@@ -60,6 +60,7 @@ export default {
   },
   emits: ['update:curriculumList'],
   setup(props, { emit }) {
+    const { tableHeight } = useViewportTableHeight(320, 360)
     const sortedCurriculums = computed(() => {
       return [...props.curriculumList].sort((a, b) => a.curriculumId - b.curriculumId)
     })
@@ -88,16 +89,7 @@ export default {
       emit('update:curriculumList', updated)
     }
     
-    return { sortedCurriculums, getCurriculumName, completeAll, resetAll }
+    return { sortedCurriculums, getCurriculumName, completeAll, resetAll, tableHeight }
   }
 }
 </script>
-
-<style scoped>
-.section-title {
-  margin-bottom: 1.5rem;
-  color: #667eea;
-  border-bottom: 2px solid #667eea;
-  padding-bottom: 0.5rem;
-}
-</style>

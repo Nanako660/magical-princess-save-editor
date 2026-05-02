@@ -32,7 +32,7 @@
     <h3 class="subsection-title">快捷操作</h3>
     
     <n-grid :cols="24" :x-gap="24" :y-gap="24" responsive="screen">
-      <n-gi :span="8">
+      <n-gi span="24 s:12 l:8 xl:6">
         <n-card title="属性快捷" size="small">
           <n-space vertical>
             <n-button block @click="confirmAction('maxAllStats')" type="warning" ghost>一键满属性</n-button>
@@ -44,7 +44,7 @@
         </n-card>
       </n-gi>
 
-      <n-gi :span="8">
+      <n-gi span="24 s:12 l:8 xl:6">
         <n-card title="善恶快捷" size="small">
           <n-space vertical>
             <n-button block @click="confirmAction('maxGoodAction')" type="warning" ghost>善行最大化</n-button>
@@ -53,7 +53,7 @@
         </n-card>
       </n-gi>
 
-      <n-gi :span="8">
+      <n-gi span="24 s:12 l:8 xl:6">
         <n-card title="NPC快捷" size="small">
           <n-space vertical>
             <n-button block @click="confirmAction('maxAllFavorability')" type="warning" ghost>全NPC满好感</n-button>
@@ -61,7 +61,7 @@
         </n-card>
       </n-gi>
 
-      <n-gi :span="8">
+      <n-gi span="24 s:12 l:8 xl:6">
         <n-card title="技能快捷" size="small">
           <n-space vertical>
             <n-button block @click="confirmAction('unlockAllSkills')" type="warning" ghost>解锁全部技能</n-button>
@@ -69,7 +69,7 @@
         </n-card>
       </n-gi>
 
-      <n-gi :span="8">
+      <n-gi span="24 s:12 l:8 xl:6">
         <n-card title="时间快捷" size="small">
           <n-space vertical>
             <n-button block @click="confirmAction('setMonth42')" type="warning" ghost>跳到最终月</n-button>
@@ -134,12 +134,6 @@ export default {
 </script>
 
 <style scoped>
-.section-title {
-  margin-bottom: 1.5rem;
-  color: #667eea;
-  border-bottom: 2px solid #667eea;
-  padding-bottom: 0.5rem;
-}
 .subsection-title {
   margin-bottom: 1rem;
   color: #888;

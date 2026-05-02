@@ -38,7 +38,7 @@
         >
           <BasicEditor v-if="activeTab === 'basic'" :status="saveData.status" />
           <DetailedEditor v-if="activeTab === 'detailed'" :status="saveData.status" />
-          <EquipmentEditor v-if="activeTab === 'equipment'" :status="saveData.status" />
+          <EquipmentEditor v-if="activeTab === 'equipment'" :status="saveData.status" :item-list="saveData.itemDataParamList" />
           <FriendEditor v-if="activeTab === 'npc'" :friend-list="saveData.friendDataParamList" />
           <ItemEditor v-if="activeTab === 'items'" :item-list="saveData.itemDataParamList" @update:item-list="saveData.itemDataParamList = $event" />
           <SkillEditor v-if="activeTab === 'skills'" :skill-list="saveData.skillDataParamList" @update:skill-list="saveData.skillDataParamList = $event" />

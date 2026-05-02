@@ -35,14 +35,14 @@ export default {
   emits: ['update:activeTab'],
   setup(props, { emit }) {
     const menuOptions = [
+      { key: 'quick', label: '快捷操作', icon: renderIcon(FlashOutline) },
       { key: 'basic', label: '基础属性', icon: renderIcon(BarChartOutline) },
       { key: 'detailed', label: '详细属性', icon: renderIcon(TrendingUpOutline) },
       { key: 'equipment', label: '装备', icon: renderIcon(ShieldOutline) },
       { key: 'npc', label: 'NPC', icon: renderIcon(PeopleOutline) },
       { key: 'items', label: '物品', icon: renderIcon(BagOutline) },
       { key: 'skills', label: '技能', icon: renderIcon(StarOutline) },
-      { key: 'global', label: '轮回数据', icon: renderIcon(SyncOutline) },
-      { key: 'quick', label: '快捷操作', icon: renderIcon(FlashOutline) }
+      { key: 'global', label: '轮回数据', icon: renderIcon(SyncOutline) }
     ]
     
     const handleUpdateValue = (key) => {

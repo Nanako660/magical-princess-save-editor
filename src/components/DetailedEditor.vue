@@ -32,16 +32,16 @@
                 <n-input-number v-model:value="status.valuePhysical" :min="0" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="力量">
-                <n-input-number v-model:value="status.phyKinryoku" :min="0" :max="999" />
+                <n-input-number v-model:value="status.phyKinryoku" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="生命">
-                <n-input-number v-model:value="status.phySeimei" :min="0" :max="999" />
+                <n-input-number v-model:value="status.phySeimei" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="精神">
-                <n-input-number v-model:value="status.phyKonjyo" :min="0" :max="999" />
+                <n-input-number v-model:value="status.phyKonjyo" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="敏捷">
-                <n-input-number v-model:value="status.phyBinsho" :min="0" :max="999" />
+                <n-input-number v-model:value="status.phyBinsho" :min="0" :max="9999" />
               </n-form-item-gi>
             </n-grid>
           </n-card>
@@ -55,16 +55,16 @@
                 <n-input-number v-model:value="status.valueIntelligence" :min="0" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="文学">
-                <n-input-number v-model:value="status.intBungaku" :min="0" :max="999" />
+                <n-input-number v-model:value="status.intBungaku" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="算术">
-                <n-input-number v-model:value="status.intSanjyutsu" :min="0" :max="999" />
+                <n-input-number v-model:value="status.intSanjyutsu" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="魔法">
-                <n-input-number v-model:value="status.intMajyutsu" :min="0" :max="999" />
+                <n-input-number v-model:value="status.intMajyutsu" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="信仰">
-                <n-input-number v-model:value="status.intShinkou" :min="0" :max="999" />
+                <n-input-number v-model:value="status.intShinkou" :min="0" :max="9999" />
               </n-form-item-gi>
             </n-grid>
           </n-card>
@@ -78,16 +78,16 @@
                 <n-input-number v-model:value="status.valueCharm" :min="0" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="美貌">
-                <n-input-number v-model:value="status.chaBibou" :min="0" :max="999" />
+                <n-input-number v-model:value="status.chaBibou" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="社交">
-                <n-input-number v-model:value="status.chaShakou" :min="0" :max="999" />
+                <n-input-number v-model:value="status.chaShakou" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="礼仪">
-                <n-input-number v-model:value="status.chaReigi" :min="0" :max="999" />
+                <n-input-number v-model:value="status.chaReigi" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="道德">
-                <n-input-number v-model:value="status.chaDoutoku" :min="0" :max="999" />
+                <n-input-number v-model:value="status.chaDoutoku" :min="0" :max="9999" />
               </n-form-item-gi>
             </n-grid>
           </n-card>
@@ -101,16 +101,16 @@
                 <n-input-number v-model:value="status.valueSense" :min="0" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="创造">
-                <n-input-number v-model:value="status.senSouzou" :min="0" :max="999" />
+                <n-input-number v-model:value="status.senSouzou" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="创作">
-                <n-input-number v-model:value="status.senSousaku" :min="0" :max="999" />
+                <n-input-number v-model:value="status.senSousaku" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="直感">
-                <n-input-number v-model:value="status.senOnkan" :min="0" :max="999" />
+                <n-input-number v-model:value="status.senOnkan" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="4" label="美感">
-                <n-input-number v-model:value="status.senBikan" :min="0" :max="999" />
+                <n-input-number v-model:value="status.senBikan" :min="0" :max="9999" />
               </n-form-item-gi>
             </n-grid>
           </n-card>

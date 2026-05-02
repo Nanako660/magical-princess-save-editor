@@ -2,44 +2,44 @@
   <section class="editor-section">
     <h2 class="section-title">物品列表</h2>
     <div class="list-controls">
-      <n-button @click="addItem" type="primary" size="small">添加物品</n-button>
       <n-text depth="3" class="item-count">共 {{ itemList.length }} 个物品</n-text>
     </div>
     
-    <n-data-table
-      :columns="columns"
-      :data="isMounting ? [] : itemList"
-      :loading="isMounting"
-      :max-height="tableHeight"
-      size="small"
-      :row-key="(row, index) => index"
-    />
+    <div class="item-groups" :style="{ maxHeight: tableHeight + 'px' }">
+      <div v-for="group in groupedItems" :key="group.name" class="item-group">
+        <h3 class="group-title">{{ group.name }} ({{ group.items.length }})</h3>
+        <n-data-table
+          :columns="columns"
+          :data="isMounting ? [] : group.items"
+          size="small"
+          :row-key="(row) => row._index"
+        />
+      </div>
+    </div>
   </section>
 </template>
 
 <script>
 import { h, computed, ref, onMounted, onUnmounted } from 'vue'
-import { NButton, NText, NDataTable, NInputNumber, NCheckbox } from 'naive-ui'
-import { ItemNames } from '../data/gameData.js'
+import { NText, NDataTable, NInputNumber, NCheckbox } from 'naive-ui'
+import { ItemNames, ItemGroups, ItemCategoryMap } from '../data/gameData.js'
 
 export default {
   name: 'ItemEditor',
-  components: { NButton, NText, NDataTable },
+  components: { NText, NDataTable },
   props: { itemList: { type: Array, required: true } },
-  emits: ['update:itemList'],
-  setup(props, { emit }) {
+  setup(props) {
     const tableHeight = ref(600)
     const isMounting = ref(true)
     
     const updateHeight = () => {
-      tableHeight.value = window.innerHeight - 250
+      tableHeight.value = window.innerHeight - 200
     }
 
     onMounted(() => {
       updateHeight()
       window.addEventListener('resize', updateHeight)
       
-      // Delay render to let Naive UI show the loading spinner and avoid locking UI instantly
       setTimeout(() => {
         isMounting.value = false
       }, 50)
@@ -51,33 +51,37 @@ export default {
 
     const getItemName = (id) => ItemNames[id] || `物品#${id}`
     
-    const addItem = () => {
-      emit('update:itemList', [...props.itemList, {
-        itemId: 0, count: 1, useCount: 0, getCount: 0,
-        isCraft: false, monthStock: 0, countTemp: 0, isShowGetEffect: false
-      }])
-    }
-    
-    const removeItem = (index) => {
-      emit('update:itemList', props.itemList.filter((_, i) => i !== index))
+    const getItemGroup = (itemId) => {
+      const cat = ItemCategoryMap[itemId]
+      if (cat !== undefined) {
+        const group = ItemGroups.find(g => g.category === cat)
+        if (group) return group.name
+      }
+      return '未分类'
     }
 
+    const groupedItems = computed(() => {
+      const groups = ItemGroups.map(g => ({ name: g.name, items: [] }))
+      const groupMap = {}
+      groups.forEach(g => { groupMap[g.name] = g })
+      
+      props.itemList.forEach((item, index) => {
+        const groupName = getItemGroup(item.itemId)
+        if (groupMap[groupName]) {
+          groupMap[groupName].items.push({ ...item, _index: index })
+        }
+      })
+      
+      return groups.filter(g => g.items.length > 0)
+    })
+    
     const columns = computed(() => [
       {
         title: '物品名称 (ID)',
         key: 'name',
-        width: 250,
+        width: 300,
         render(row) {
-          return h('div', { class: 'item-name-cell' }, [
-            h('span', { class: 'item-name' }, getItemName(row.itemId)),
-            h(NInputNumber, {
-              value: row.itemId,
-              min: 0,
-              size: 'tiny',
-              style: { width: '100px' },
-              'onUpdate:value': (v) => row.itemId = v
-            })
-          ])
+          return h('span', { class: 'item-name' }, `${getItemName(row.itemId)} (#${row.itemId})`)
         }
       },
       {
@@ -116,23 +120,10 @@ export default {
             'onUpdate:checked': (v) => row.isCraft = v
           })
         }
-      },
-      {
-        title: '操作',
-        key: 'actions',
-        width: 100,
-        render(row, index) {
-          return h(NButton, {
-            type: 'error',
-            size: 'small',
-            ghost: true,
-            onClick: () => removeItem(index)
-          }, { default: () => '删除' })
-        }
       }
     ])
 
-    return { getItemName, addItem, removeItem, columns, tableHeight, isMounting }
+    return { columns, tableHeight, isMounting, groupedItems }
   }
 }
 </script>
@@ -158,10 +149,19 @@ export default {
   align-items: center;
   margin-bottom: 16px;
 }
-:deep(.item-name-cell) {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.item-groups {
+  overflow-y: auto;
+  flex: 1;
+}
+.item-group {
+  margin-bottom: 1.5rem;
+}
+.group-title {
+  color: #8b5cf6;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  padding-left: 0.5rem;
+  border-left: 3px solid #8b5cf6;
 }
 :deep(.item-name) {
   font-weight: 600;

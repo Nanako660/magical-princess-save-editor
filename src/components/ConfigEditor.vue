@@ -7,17 +7,17 @@
         <n-card title="语言与音量" size="small">
           <n-form :model="config" label-placement="top">
             <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
-              <n-form-item-gi span="24 s:12 m:8 xl:6" label="语言">
+              <n-form-item-gi span="24 s:12" label="语言">
                 <n-select 
                   v-model:value="config.lang" 
                   :options="langOptions"
                   placeholder="选择语言"
                 />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:8 xl:6" label="跳过模式">
+              <n-form-item-gi span="24 s:12" label="跳过模式">
                 <n-switch v-model:value="config.isCastingMode" />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:8 xl:6" label="BGM 音量">
+              <n-form-item-gi span="24 s:12" label="BGM 音量">
                 <n-slider 
                   v-model:value="config.volumeBGM" 
                   :min="0" 
@@ -26,7 +26,7 @@
                   :tooltip="true"
                 />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:8 xl:6" label="SE 音量">
+              <n-form-item-gi span="24 s:12" label="SE 音量">
                 <n-slider 
                   v-model:value="config.volumeSE" 
                   :min="0" 
@@ -35,7 +35,7 @@
                   :tooltip="true"
                 />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:8 xl:6" label="语音音量">
+              <n-form-item-gi span="24 s:12" label="语音音量">
                 <n-slider 
                   v-model:value="config.volumeVoice" 
                   :min="0" 
@@ -44,7 +44,7 @@
                   :tooltip="true"
                 />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:8 xl:6" label="消息速度">
+              <n-form-item-gi span="24 s:12" label="消息速度">
                 <n-slider 
                   v-model:value="config.messageSpeed" 
                   :min="0.5" 

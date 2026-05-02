@@ -32,49 +32,49 @@
     <h3 class="subsection-title">快捷操作</h3>
     
     <n-grid :cols="24" :x-gap="24" :y-gap="24" responsive="screen">
-      <n-gi span="24 s:12 l:8 xl:6">
+      <n-gi span="24 s:12">
         <n-card title="属性快捷" size="small">
-          <n-space vertical>
-            <n-button block @click="confirmAction('maxAllStats')" type="warning" ghost>一键满属性</n-button>
-            <n-button block @click="confirmAction('maxMoney')" type="warning" ghost>金钱最大化</n-button>
-            <n-button block @click="confirmAction('clearStress')" type="warning" ghost>压力清零</n-button>
-            <n-button block @click="confirmAction('maxActionPower')" type="warning" ghost>行动力全满</n-button>
-            <n-button block @click="confirmAction('maxBlackCoin')" type="warning" ghost>东亚硬币最大化</n-button>
-          </n-space>
+          <n-grid :cols="2" :x-gap="12" :y-gap="12">
+            <n-gi><n-button block @click="confirmAction('maxAllStats')" type="warning" ghost>一键满属性</n-button></n-gi>
+            <n-gi><n-button block @click="confirmAction('maxMoney')" type="warning" ghost>金钱最大化</n-button></n-gi>
+            <n-gi><n-button block @click="confirmAction('clearStress')" type="warning" ghost>压力清零</n-button></n-gi>
+            <n-gi><n-button block @click="confirmAction('maxActionPower')" type="warning" ghost>行动力全满</n-button></n-gi>
+            <n-gi span="2"><n-button block @click="confirmAction('maxBlackCoin')" type="warning" ghost>东亚硬币最大化</n-button></n-gi>
+          </n-grid>
         </n-card>
       </n-gi>
 
-      <n-gi span="24 s:12 l:8 xl:6">
+      <n-gi span="24 s:12">
         <n-card title="善恶快捷" size="small">
-          <n-space vertical>
-            <n-button block @click="confirmAction('maxGoodAction')" type="warning" ghost>善行最大化</n-button>
-            <n-button block @click="confirmAction('maxBadAction')" type="warning" ghost>恶行最大化</n-button>
-          </n-space>
+          <n-grid :cols="2" :x-gap="12" :y-gap="12">
+            <n-gi><n-button block @click="confirmAction('maxGoodAction')" type="warning" ghost>善行最大化</n-button></n-gi>
+            <n-gi><n-button block @click="confirmAction('maxBadAction')" type="warning" ghost>恶行最大化</n-button></n-gi>
+          </n-grid>
         </n-card>
       </n-gi>
 
-      <n-gi span="24 s:12 l:8 xl:6">
+      <n-gi span="24 s:12">
         <n-card title="NPC快捷" size="small">
-          <n-space vertical>
-            <n-button block @click="confirmAction('maxAllFavorability')" type="warning" ghost>全NPC满好感</n-button>
-          </n-space>
+          <n-grid :cols="2" :x-gap="12" :y-gap="12">
+            <n-gi span="2"><n-button block @click="confirmAction('maxAllFavorability')" type="warning" ghost>全NPC满好感</n-button></n-gi>
+          </n-grid>
         </n-card>
       </n-gi>
 
-      <n-gi span="24 s:12 l:8 xl:6">
+      <n-gi span="24 s:12">
         <n-card title="技能快捷" size="small">
-          <n-space vertical>
-            <n-button block @click="confirmAction('unlockAllSkills')" type="warning" ghost>解锁全部技能</n-button>
-          </n-space>
+          <n-grid :cols="2" :x-gap="12" :y-gap="12">
+            <n-gi span="2"><n-button block @click="confirmAction('unlockAllSkills')" type="warning" ghost>解锁全部技能</n-button></n-gi>
+          </n-grid>
         </n-card>
       </n-gi>
 
-      <n-gi span="24 s:12 l:8 xl:6">
+      <n-gi span="24 s:12">
         <n-card title="时间快捷" size="small">
-          <n-space vertical>
-            <n-button block @click="confirmAction('setMonth42')" type="warning" ghost>跳到最终月</n-button>
-            <n-button block @click="confirmAction('resetToMonth0')" type="warning" ghost>重置到初始月</n-button>
-          </n-space>
+          <n-grid :cols="2" :x-gap="12" :y-gap="12">
+            <n-gi><n-button block @click="confirmAction('setMonth42')" type="warning" ghost>跳到最终月</n-button></n-gi>
+            <n-gi><n-button block @click="confirmAction('resetToMonth0')" type="warning" ghost>重置到初始月</n-button></n-gi>
+          </n-grid>
         </n-card>
       </n-gi>
     </n-grid>

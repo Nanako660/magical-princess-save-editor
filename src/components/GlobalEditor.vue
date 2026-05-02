@@ -6,33 +6,33 @@
         <n-card title="基础轮回信息" size="small">
           <n-form :model="gstatus" label-placement="top">
             <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
-              <n-form-item-gi span="24 s:12 m:6 xl:6" label="轮回次数">
+              <n-form-item-gi span="24 s:12" label="轮回次数">
                 <n-input-number v-model:value="gstatus.loopCount" :min="1" />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:6 xl:6" label="成就点数">
+              <n-form-item-gi span="24 s:12" label="成就点数">
                 <n-input-number v-model:value="gstatus.acvPoint" :min="0" />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:6 xl:6" label="玩家生日月">
+              <n-form-item-gi span="24 s:12" label="玩家生日月">
                 <n-input-number v-model:value="gstatus.playerBirthDay" :min="1" :max="12" />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:6 xl:6" label="玩家生日日">
+              <n-form-item-gi span="24 s:12" label="玩家生日日">
                 <n-input-number v-model:value="gstatus.playerBirthDayDate" :min="1" :max="31" />
               </n-form-item-gi>
 
-              <n-form-item-gi span="24 s:12 m:6 xl:6" label="玩家名称">
+              <n-form-item-gi span="24 s:12" label="玩家名称">
                 <n-input v-model:value="gstatus.playerName" />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:6 xl:6" label="父亲名称">
+              <n-form-item-gi span="24 s:12" label="父亲名称">
                 <n-input v-model:value="gstatus.fatherName" />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:6 xl:6" label="父亲昵称">
+              <n-form-item-gi span="24 s:12" label="父亲昵称">
                 <n-input v-model:value="gstatus.fatherGivenName" />
               </n-form-item-gi>
 
-              <n-form-item-gi span="24 s:12 m:6 xl:6" label="父亲生日月">
+              <n-form-item-gi span="24 s:12" label="父亲生日月">
                 <n-input-number v-model:value="gstatus.fatherBirthDay" :min="1" :max="12" />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:6 xl:6" label="父亲生日日">
+              <n-form-item-gi span="24 s:12" label="父亲生日日">
                 <n-input-number v-model:value="gstatus.fatherBirthDayDate" :min="1" :max="31" />
               </n-form-item-gi>
             </n-grid>

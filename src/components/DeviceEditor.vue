@@ -7,17 +7,17 @@
         <n-card title="显示设置" size="small">
           <n-form :model="device" label-placement="top">
             <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
-              <n-form-item-gi span="24 s:12 m:8 xl:6" label="全屏模式">
+              <n-form-item-gi span="24 s:12" label="全屏模式">
                 <n-switch v-model:value="device.isFullScreen" />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:8 xl:6" label="分辨率">
+              <n-form-item-gi span="24 s:12" label="分辨率">
                 <n-select 
                   v-model:value="device.resolutionListId" 
                   :options="resolutionOptions"
                   placeholder="选择分辨率"
                 />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:8 xl:6" label="画质">
+              <n-form-item-gi span="24 s:12" label="画质">
                 <n-select 
                   v-model:value="device.qualityListType" 
                   :options="qualityOptions"

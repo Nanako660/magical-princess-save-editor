@@ -6,22 +6,22 @@
         <n-card title="时间与资源" size="small">
           <n-form :model="status" label-placement="top">
             <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
-              <n-form-item-gi span="24 s:12 m:8 xl:8" label="当前月份">
+              <n-form-item-gi span="24 s:12" label="当前月份">
                 <n-input-group>
                   <n-input-number v-model:value="status.period" :min="0" :max="42" style="flex: 1;" />
                   <n-input-group-label>{{ periodText }}</n-input-group-label>
                 </n-input-group>
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:8 xl:8" label="金钱">
+              <n-form-item-gi span="24 s:12" label="金钱">
                 <n-input-number v-model:value="status.money" :min="0" :max="9999999" />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:8 xl:8" label="东亚硬币">
+              <n-form-item-gi span="24 s:12" label="东亚硬币">
                 <n-input-number v-model:value="status.blackCoin" :min="0" :max="9999" />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:8 xl:8" label="行动力">
+              <n-form-item-gi span="24 s:12" label="行动力">
                 <n-input-number v-model:value="status.activePower" :min="0" :max="99" />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 m:8 xl:8" label="最大行动力">
+              <n-form-item-gi span="24 s:12" label="最大行动力">
                 <n-input-number v-model:value="status.activePowerMax" :min="0" :max="99" />
               </n-form-item-gi>
             </n-grid>

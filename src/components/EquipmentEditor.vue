@@ -6,7 +6,7 @@
         <n-card title="角色装备" size="small">
           <n-form :model="status" label-placement="top">
             <n-grid :cols="24" :x-gap="24" :y-gap="12" responsive="screen">
-              <n-form-item-gi span="24 s:12 l:8" label="服装">
+              <n-form-item-gi span="24 s:12" label="服装">
                 <n-select
                   v-model:value="status.equipCloth"
                   :options="clothOptions"
@@ -14,7 +14,7 @@
                   placeholder="选择服装"
                 />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 l:8" label="武器">
+              <n-form-item-gi span="24 s:12" label="武器">
                 <n-select
                   v-model:value="status.equipWeapon"
                   :options="weaponOptions"
@@ -22,7 +22,7 @@
                   placeholder="选择武器"
                 />
               </n-form-item-gi>
-              <n-form-item-gi span="24 s:12 l:8" label="饰品">
+              <n-form-item-gi span="24 s:12" label="饰品">
                 <n-select
                   v-model:value="status.equipArmor"
                   :options="armorOptions"

@@ -14,25 +14,27 @@
             <template #header-extra>
               <n-text depth="3">好感: {{ friendList[index]?.fFavarite }}</n-text>
             </template>
-            <n-form :model="friendList[index]" label-placement="left" label-width="80">
-              <n-form-item label="好感度">
-                <n-input-number v-model:value="friendList[index].fFavarite" :min="0" :max="100" size="small" />
-              </n-form-item>
-              <n-form-item label="见面次数">
-                <n-input-number v-model:value="friendList[index].fMeet" :min="0" size="small" />
-              </n-form-item>
-              <n-form-item label="对话次数">
-                <n-input-number v-model:value="friendList[index].fConversation" :min="0" size="small" />
-              </n-form-item>
-              <n-form-item label="约会次数">
-                <n-input-number v-model:value="friendList[index].fDate" :min="0" size="small" />
-              </n-form-item>
-              <n-form-item label="送礼次数">
-                <n-input-number v-model:value="friendList[index].fPresent" :min="0" size="small" />
-              </n-form-item>
-              <n-form-item label="恋爱事件">
-                <n-input-number v-model:value="friendList[index].fLoveEvents" :min="0" :max="4" size="small" />
-              </n-form-item>
+            <n-form :model="friendList[index]" label-placement="top">
+              <n-grid :cols="2" :x-gap="12">
+                <n-form-item-gi label="好感度">
+                  <n-input-number v-model:value="friendList[index].fFavarite" :min="0" :max="100" size="small" />
+                </n-form-item-gi>
+                <n-form-item-gi label="见面次数">
+                  <n-input-number v-model:value="friendList[index].fMeet" :min="0" size="small" />
+                </n-form-item-gi>
+                <n-form-item-gi label="对话次数">
+                  <n-input-number v-model:value="friendList[index].fConversation" :min="0" size="small" />
+                </n-form-item-gi>
+                <n-form-item-gi label="约会次数">
+                  <n-input-number v-model:value="friendList[index].fDate" :min="0" size="small" />
+                </n-form-item-gi>
+                <n-form-item-gi label="送礼次数">
+                  <n-input-number v-model:value="friendList[index].fPresent" :min="0" size="small" />
+                </n-form-item-gi>
+                <n-form-item-gi label="恋爱事件" v-if="friendList[index].fLoveEvents !== undefined">
+                  <n-input-number v-model:value="friendList[index].fLoveEvents" :min="0" :max="4" size="small" />
+                </n-form-item-gi>
+              </n-grid>
             </n-form>
           </n-card>
         </div>
@@ -51,22 +53,24 @@
             <template #header-extra>
               <n-text depth="3">好感: {{ friendList[index]?.fFavarite }}</n-text>
             </template>
-            <n-form :model="friendList[index]" label-placement="left" label-width="80">
-              <n-form-item label="好感度">
-                <n-input-number v-model:value="friendList[index].fFavarite" :min="0" :max="100" size="small" />
-              </n-form-item>
-              <n-form-item label="见面次数">
-                <n-input-number v-model:value="friendList[index].fMeet" :min="0" size="small" />
-              </n-form-item>
-              <n-form-item label="对话次数">
-                <n-input-number v-model:value="friendList[index].fConversation" :min="0" size="small" />
-              </n-form-item>
-              <n-form-item label="约会次数">
-                <n-input-number v-model:value="friendList[index].fDate" :min="0" size="small" />
-              </n-form-item>
-              <n-form-item label="送礼次数">
-                <n-input-number v-model:value="friendList[index].fPresent" :min="0" size="small" />
-              </n-form-item>
+            <n-form :model="friendList[index]" label-placement="top">
+              <n-grid :cols="2" :x-gap="12">
+                <n-form-item-gi label="好感度">
+                  <n-input-number v-model:value="friendList[index].fFavarite" :min="0" :max="100" size="small" />
+                </n-form-item-gi>
+                <n-form-item-gi label="见面次数">
+                  <n-input-number v-model:value="friendList[index].fMeet" :min="0" size="small" />
+                </n-form-item-gi>
+                <n-form-item-gi label="对话次数">
+                  <n-input-number v-model:value="friendList[index].fConversation" :min="0" size="small" />
+                </n-form-item-gi>
+                <n-form-item-gi label="约会次数">
+                  <n-input-number v-model:value="friendList[index].fDate" :min="0" size="small" />
+                </n-form-item-gi>
+                <n-form-item-gi label="送礼次数">
+                  <n-input-number v-model:value="friendList[index].fPresent" :min="0" size="small" />
+                </n-form-item-gi>
+              </n-grid>
             </n-form>
           </n-card>
         </div>
@@ -76,12 +80,12 @@
 </template>
 
 <script>
-import { NCard, NForm, NFormItem, NInputNumber, NText } from 'naive-ui'
+import { NCard, NForm, NGrid, NFormItemGi, NInputNumber, NText } from 'naive-ui'
 import { FriendNames, FriendJobs, RomanceableNPCs } from '../data/gameData.js'
 
 export default {
   name: 'FriendEditor',
-  components: { NCard, NForm, NFormItem, NInputNumber, NText },
+  components: { NCard, NForm, NGrid, NFormItemGi, NInputNumber, NText },
   props: { friendList: { type: Array, required: true } },
   setup(props) {
     const getCharaName = (id) => {

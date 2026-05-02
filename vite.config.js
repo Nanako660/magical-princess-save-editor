@@ -3,6 +3,8 @@ import vue from '@vitejs/plugin-vue'
 import { viteSingleFile } from 'vite-plugin-singlefile'
 import sharp from 'sharp'
 
+const pkg = require('./package.json')
+
 function webpPlugin() {
   return {
     name: 'vite-plugin-webp',
@@ -21,6 +23,9 @@ function webpPlugin() {
 
 export default defineConfig({
   plugins: [vue(), webpPlugin(), viteSingleFile()],
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version)
+  },
   build: {
     target: 'esnext',
     assetsInlineLimit: 100000000,

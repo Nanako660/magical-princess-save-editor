@@ -11,14 +11,14 @@
 import { h } from 'vue'
 import { NMenu, NIcon } from 'naive-ui'
 import {
+  HomeOutline,
   BarChartOutline,
   TrendingUpOutline,
   ShieldOutline,
   PeopleOutline,
   BagOutline,
   StarOutline,
-  SyncOutline,
-  FlashOutline
+  SyncOutline
 } from '@vicons/ionicons5'
 
 function renderIcon(icon) {
@@ -35,7 +35,7 @@ export default {
   emits: ['update:activeTab'],
   setup(props, { emit }) {
     const menuOptions = [
-      { key: 'quick', label: '快捷操作', icon: renderIcon(FlashOutline) },
+      { key: 'quick', label: '首页', icon: renderIcon(HomeOutline) },
       { key: 'basic', label: '基础属性', icon: renderIcon(BarChartOutline) },
       { key: 'detailed', label: '详细属性', icon: renderIcon(TrendingUpOutline) },
       { key: 'equipment', label: '装备', icon: renderIcon(ShieldOutline) },

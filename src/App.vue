@@ -5,10 +5,10 @@
       <!-- 顶栏 -->
       <n-layout-header bordered class="app-header">
         <div class="header-inner">
-          <h1><img :src="logoSrc" alt="Magical Princess" class="header-logo" /> <span class="header-title">存档编辑器</span></h1>
-
-          <div v-if="dirReady" class="header-actions">
-            <n-popover trigger="click" placement="bottom-end" :show="slotPopoverShow" @update:show="slotPopoverShow = $event">
+          <div class="header-left">
+            <h1><img :src="logoSrc" alt="Magical Princess" class="header-logo" /> <span class="header-title">存档编辑器</span></h1>
+            
+            <n-popover v-if="dirReady" trigger="click" placement="bottom-start" :show="slotPopoverShow" @update:show="slotPopoverShow = $event">
               <template #trigger>
                 <n-button quaternary type="info" @click="slotPopoverShow = !slotPopoverShow">
                   <template #icon><n-icon><FolderOpenOutline /></n-icon></template>
@@ -32,24 +32,29 @@
                 </div>
               </n-scrollbar>
             </n-popover>
+          </div>
+
+          <div v-if="dirReady" class="header-actions">
 
             <n-button v-if="hasData" quaternary type="success" @click="openSaveModal">
               <template #icon><n-icon><SaveOutline /></n-icon></template>
-              保存
+              应用编辑
             </n-button>
 
-            <n-button v-if="hasData" quaternary @click="handleBack">
-              <template #icon><n-icon><ArrowBackOutline /></n-icon></template>
-              返回
-            </n-button>
-
-            <n-popconfirm @positive-click="handleReset">
+            <n-popconfirm 
+              @positive-click="handleReset"
+            >
               <template #trigger>
                 <n-button quaternary type="error" size="small">
                   <template #icon><n-icon><RefreshOutline /></n-icon></template>
+                  重置
                 </n-button>
               </template>
-              重置目录配置？将清除已保存的存档目录。
+              确定重置目录配置？将清除已保存的存档目录。
+              <template #action="{ handlePositiveClick, handleNegativeClick }">
+                <n-button size="small" type="error" @click="handlePositiveClick">确认</n-button>
+                <n-button size="small" @click="handleNegativeClick">取消</n-button>
+              </template>
             </n-popconfirm>
           </div>
         </div>
@@ -105,18 +110,19 @@
         </n-layout>
 
         <n-layout-footer bordered position="absolute" class="app-footer">
-          <span>{{ footerText }}</span>
+          <span class="footer-left">{{ footerText }}</span>
+          <span class="footer-right">v{{ appVersion }}</span>
         </n-layout-footer>
       </template>
     </n-layout>
 
     <n-modal v-model:show="showSaveModal" preset="dialog" type="info"
-      title="确认保存"
+      title="确认应用编辑"
       :loading="isSaving"
     >
-      <p style="color: #ccc;">确定要将当前修改保存到 <strong>{{ fileName }}</strong> 吗？</p>
+      <p style="color: #ccc;">确定要将当前修改应用到 <strong>{{ fileName }}</strong> 吗？</p>
       <template #action>
-        <n-button type="primary" :loading="isSaving" @click="handleSave">保存</n-button>
+        <n-button type="primary" :loading="isSaving" @click="handleSave">应用</n-button>
         <n-button @click="showSaveModal = false">取消</n-button>
       </template>
     </n-modal>
@@ -171,7 +177,7 @@ export default {
 
     const { getActionInfo, executeAction } = useQuickActions(saveData)
 
-    const activeTab = ref('basic')
+    const activeTab = ref('quick')
     const isSaving = ref(false)
     const slotPopoverShow = ref(false)
     const showSaveModal = ref(false)
@@ -181,8 +187,13 @@ export default {
       const slot = saveData.value.saveSlotId || 1
       const month = getMonthText(saveData.value.status?.period || 0)
       const money = saveData.value.status?.money || 0
-      return `存档槽位: ${slot} | ${month} | 金钱: ${money}`
+      const stress = saveData.value.status?.stress || 0
+      const activePower = saveData.value.status?.activePower || 0
+      const activePowerMax = saveData.value.status?.activePowerMax || 0
+      return `槽位: ${slot} | ${month} | 金钱: ${money} | 压力: ${stress} | 行动力: ${activePower}/${activePowerMax}`
     })
+
+    const appVersion = __APP_VERSION__
 
     const handlePickDir = async () => {
       const ok = await pickDir()
@@ -193,7 +204,7 @@ export default {
       slotPopoverShow.value = false
       await loadSlot(slot)
       if (!error.value && hasData.value) {
-        activeTab.value = 'basic'
+        activeTab.value = 'quick'
         message.success(`已加载 ${slot.name}`)
       } else if (error.value) {
         message.error(`加载失败: ${error.value}`)
@@ -242,7 +253,7 @@ export default {
     }
 
     return {
-      darkTheme, logoSrc,
+      darkTheme, logoSrc, appVersion,
       saveData, isLoading, fileName, activeTab, hasData, footerText,
       dirReady, dirName, saveSlots, slotPopoverShow, isSaving,
       showSaveModal,
@@ -271,6 +282,12 @@ html, body, #app {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .app-header h1 {
@@ -321,9 +338,19 @@ html, body, #app {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   font-size: 0.85rem;
   color: #888;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+.footer-left {
+  flex: 1;
+}
+
+.footer-right {
+  color: #666;
 }
 
 .slot-list {

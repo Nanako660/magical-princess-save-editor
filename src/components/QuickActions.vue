@@ -1,9 +1,35 @@
 <template>
   <section class="editor-section">
-    <h2 class="section-title">快捷操作</h2>
-    <n-alert title="警告" type="warning" style="margin-bottom: 24px;">
-      以下操作会直接修改存档数据，请谨慎使用！
+    <h2 class="section-title">首页</h2>
+    
+    <n-alert title="使用说明" type="success" style="margin-bottom: 24px;">
+      <template #icon>
+        <n-icon><HelpCircleOutline /></n-icon>
+      </template>
+      <n-space vertical :size="12">
+        <div>
+          <n-text depth="2" strong>基本操作：</n-text>
+          <n-text depth="3">点击顶部目录按钮选择存档文件，修改后点击应用编辑按钮保存更改。</n-text>
+        </div>
+        <div>
+          <n-text depth="2" strong>修改时机：</n-text>
+          <n-text depth="3">可在游戏运行过程中在主菜单修改存档，修改完成后重新加载存档生效。但建议退出游戏修改，修改完成后重新启动游戏。</n-text>
+        </div>
+        <div>
+          <n-text depth="2" strong>功能模块：</n-text>
+          <n-text depth="3">左侧菜单提供基础属性、详细属性、装备、NPC、物品、技能、轮回数据等编辑功能。</n-text>
+        </div>
+      </n-space>
     </n-alert>
+    
+    <n-alert title="警告" type="error" style="margin-bottom: 24px;">
+      <template #icon>
+        <n-icon><WarningOutline /></n-icon>
+      </template>
+      存档修改操作不可逆！强烈建议在修改前备份原始存档文件。错误的数据可能导致游戏无法正常读取存档。
+    </n-alert>
+    
+    <h3 class="subsection-title">快捷操作</h3>
     
     <n-grid :cols="24" :x-gap="24" :y-gap="24" responsive="screen">
       <n-gi :span="8">
@@ -74,11 +100,12 @@
 
 <script>
 import { ref } from 'vue'
-import { NGrid, NGi, NCard, NSpace, NButton, NAlert, NModal } from 'naive-ui'
+import { NGrid, NGi, NCard, NSpace, NButton, NAlert, NModal, NText, NIcon } from 'naive-ui'
+import { HelpCircleOutline, WarningOutline } from '@vicons/ionicons5'
 
 export default {
   name: 'QuickActions',
-  components: { NGrid, NGi, NCard, NSpace, NButton, NAlert, NModal },
+  components: { NGrid, NGi, NCard, NSpace, NButton, NAlert, NModal, NText, NIcon, HelpCircleOutline, WarningOutline },
   emits: ['execute'],
   setup(props, { emit }) {
     const showModal = ref(false)
@@ -113,5 +140,11 @@ export default {
   color: #667eea;
   border-bottom: 2px solid #667eea;
   padding-bottom: 0.5rem;
+}
+.subsection-title {
+  margin-bottom: 1rem;
+  color: #888;
+  font-size: 1rem;
+  font-weight: 500;
 }
 </style>

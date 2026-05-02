@@ -1,26 +1,100 @@
 import { ref, computed } from 'vue'
 import { parseSaveFile, serializeSaveFile, getPeriodText } from '../utils/saveParser.js'
+import { saveDirHandle, loadDirHandle, verifyPermission } from '../utils/dirStore.js'
 
-/**
- * 存档数据管理 Composable
- * 负责存档的加载、解析、导出
- */
+const hasFSA = typeof window.showOpenFilePicker === 'function'
+
+const SAVE_PATTERN = /^v10_userdata(\d+)\.dat$/
+
 export function useSaveData() {
   const saveData = ref(null)
   const isLoading = ref(false)
   const fileName = ref('')
   const error = ref(null)
 
-  /**
-   * 导入存档文件
-   * @param {File} file - 用户选择的文件
-   */
-  const importSave = async (file) => {
-    if (!file) return
-    
+  const dirReady = ref(false)
+  const dirName = ref('')
+  const saveSlots = ref([])
+
+  let dirHandle = null
+
+  async function restoreDir() {
+    if (!hasFSA) return
+    try {
+      const handle = await loadDirHandle()
+      if (!handle) return
+      const ok = await verifyPermission(handle)
+      if (!ok) return
+      dirHandle = handle
+      dirName.value = handle.name
+      dirReady.value = true
+      await refreshSlots()
+    } catch {}
+  }
+
+  async function pickDir() {
+    if (!hasFSA) return false
+    try {
+      const handle = await window.showDirectoryPicker({
+        mode: 'readwrite',
+        startIn: dirHandle || 'desktop'
+      })
+      dirHandle = handle
+      dirName.value = handle.name
+      dirReady.value = true
+      await saveDirHandle(handle)
+      await refreshSlots()
+      return true
+    } catch (e) {
+      if (e.name !== 'AbortError') console.error('pickDir error:', e)
+      return false
+    }
+  }
+
+  async function refreshSlots() {
+    if (!dirHandle) { saveSlots.value = []; return }
+    const slots = []
+    try {
+      for await (const [name, fh] of dirHandle) {
+        const m = name.match(SAVE_PATTERN)
+        if (m && fh.kind === 'file') {
+          const file = await fh.getFile()
+          slots.push({
+            slotId: parseInt(m[1]),
+            name,
+            size: file.size,
+            lastModified: file.lastModified,
+            handle: fh
+          })
+        }
+      }
+      slots.sort((a, b) => a.slotId - b.slotId)
+    } catch (e) {
+      console.error('refreshSlots error:', e)
+    }
+    saveSlots.value = slots
+  }
+
+  async function loadSlot(slot) {
     isLoading.value = true
     error.value = null
-    
+    try {
+      const file = await slot.handle.getFile()
+      const content = await file.text()
+      saveData.value = parseSaveFile(content)
+      fileName.value = slot.name
+    } catch (e) {
+      error.value = '存档加载失败：' + e.message
+      console.error('loadSlot error:', e)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const importSave = async (file) => {
+    if (!file) return
+    isLoading.value = true
+    error.value = null
     try {
       const content = await file.text()
       saveData.value = parseSaveFile(content)
@@ -33,20 +107,49 @@ export function useSaveData() {
     }
   }
 
-  /**
-   * 导出存档文件
-   */
-  const exportSave = () => {
-    if (!saveData.value) {
-      error.value = '没有可导出的数据'
+  const pickAndImportSave = async () => {
+    if (!hasFSA) return null
+    isLoading.value = true
+    error.value = null
+    try {
+      const opts = {
+        types: [{ description: '存档文件', accept: { 'application/octet-stream': ['.dat'] } }],
+        multiple: false
+      }
+      if (dirHandle) opts.startIn = dirHandle
+
+      const [handle] = await window.showOpenFilePicker(opts)
+      const file = await handle.getFile()
+      const content = await file.text()
+      saveData.value = parseSaveFile(content)
+      fileName.value = file.name
+
+      try {
+        dirHandle = await handle.getParent()
+        dirName.value = dirHandle.name
+        dirReady.value = true
+        await saveDirHandle(dirHandle)
+        await refreshSlots()
+      } catch {}
+
+      return handle
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        error.value = '存档加载失败：' + e.message
+        console.error('Import error:', e)
+      }
       return null
+    } finally {
+      isLoading.value = false
     }
-    
+  }
+
+  const exportSave = () => {
+    if (!saveData.value) { error.value = '没有可导出的数据'; return null }
     try {
       const encrypted = serializeSaveFile(saveData.value)
       const slotId = saveData.value.saveSlotId || 1
       const name = `v10_userdata${slotId}.dat`
-      
       return { content: encrypted, fileName: name }
     } catch (e) {
       error.value = '导出失败：' + e.message
@@ -55,13 +158,50 @@ export function useSaveData() {
     }
   }
 
-  /**
-   * 下载导出的文件
-   */
-  const downloadSave = () => {
+  async function writeToFile(slot, content) {
+    if (!dirHandle) return false
+    try {
+      const fh = await dirHandle.getFileHandle(slot.name, { create: true })
+      const writable = await fh.createWritable()
+      await writable.write(content)
+      await writable.close()
+      await refreshSlots()
+      return true
+    } catch (e) {
+      console.error('writeToFile error:', e)
+      return false
+    }
+  }
+
+  const downloadSave = async () => {
     const result = exportSave()
     if (!result) return
-    
+
+    if (hasFSA && dirHandle) {
+      try {
+        const ok = await writeToFile({ name: result.fileName }, result.content)
+        if (ok) return
+      } catch (e) {
+        console.warn('直接写入失败，尝试选择文件:', e)
+      }
+
+      try {
+        const opts = {
+          suggestedName: result.fileName,
+          types: [{ description: '存档文件', accept: { 'application/octet-stream': ['.dat'] } }],
+          startIn: dirHandle
+        }
+        const handle = await window.showSaveFilePicker(opts)
+        const writable = await handle.createWritable()
+        await writable.write(result.content)
+        await writable.close()
+        return
+      } catch (e) {
+        if (e.name === 'AbortError') return
+        console.warn('FS Access fallback:', e)
+      }
+    }
+
     const blob = new Blob([result.content], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -71,42 +211,24 @@ export function useSaveData() {
     URL.revokeObjectURL(url)
   }
 
-  /**
-   * 获取月份显示文本
-   */
-  const getMonthText = (period) => {
-    return getPeriodText(period)
-  }
+  const getMonthText = (period) => getPeriodText(period)
 
-  /**
-   * 检查是否已加载存档
-   */
-  const hasData = computed(() => {
-    return saveData.value !== null && saveData.value.status !== undefined
-  })
+  const hasData = computed(() => saveData.value !== null && saveData.value.status !== undefined)
 
-  /**
-   * 清除当前数据
-   */
   const clearData = () => {
     saveData.value = null
     fileName.value = ''
     error.value = null
   }
 
+  restoreDir()
+
   return {
-    // 状态
-    saveData,
-    isLoading,
-    fileName,
-    error,
-    
-    // 方法
-    importSave,
-    exportSave,
-    downloadSave,
-    getMonthText,
-    hasData,
-    clearData
+    saveData, isLoading, fileName, error,
+    dirReady, dirName, saveSlots,
+    importSave, pickAndImportSave,
+    pickDir, loadSlot, refreshSlots,
+    exportSave, downloadSave,
+    getMonthText, hasData, clearData
   }
 }

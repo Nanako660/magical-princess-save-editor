@@ -10,8 +10,13 @@
             :has-data="hasData"
             :is-loading="isLoading"
             :file-name="fileName"
+            :dir-ready="dirReady"
+            :dir-name="dirName"
+            :save-slots="saveSlots"
             @import="handleImport"
             @export="handleExport"
+            @pick-dir="handlePickDir"
+            @load-slot="handleLoadSlot"
           />
         </div>
       </n-layout-header>
@@ -101,7 +106,10 @@ export default {
     })
     
     const { 
-      saveData, isLoading, fileName, error, importSave, downloadSave, getMonthText, hasData
+      saveData, isLoading, fileName, error,
+      dirReady, dirName, saveSlots,
+      importSave, pickAndImportSave, pickDir, loadSlot, downloadSave,
+      getMonthText, hasData
     } = useSaveData()
     
     const { executeAction } = useQuickActions(saveData)
@@ -117,18 +125,37 @@ export default {
     })
     
     const handleImport = async (file) => {
-      await importSave(file)
-      if (!error.value) {
+      if (file) {
+        await importSave(file)
+      } else {
+        await pickAndImportSave()
+      }
+      if (!error.value && hasData.value) {
         activeTab.value = 'basic'
         message.success('存档导入成功')
-      } else {
+      } else if (error.value) {
         message.error(`导入失败: ${error.value}`)
       }
     }
     
-    const handleExport = () => {
-      downloadSave()
+    const handleExport = async () => {
+      await downloadSave()
       message.success('存档已导出')
+    }
+
+    const handlePickDir = async () => {
+      const ok = await pickDir()
+      if (ok) message.success('存档目录已设置')
+    }
+
+    const handleLoadSlot = async (slot) => {
+      await loadSlot(slot)
+      if (!error.value && hasData.value) {
+        activeTab.value = 'basic'
+        message.success(`已加载 ${slot.name}`)
+      } else if (error.value) {
+        message.error(`加载失败: ${error.value}`)
+      }
     }
     
     const handleQuickAction = (action) => {
@@ -141,7 +168,8 @@ export default {
     return {
       darkTheme,
       saveData, isLoading, fileName, activeTab, hasData, footerText,
-      handleImport, handleExport, handleQuickAction
+      dirReady, dirName, saveSlots,
+      handleImport, handleExport, handlePickDir, handleLoadSlot, handleQuickAction
     }
   }
 }

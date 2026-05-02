@@ -5,7 +5,7 @@
       <n-text depth="3" class="item-count">共 {{ itemList.length }} 个物品</n-text>
     </div>
     
-    <div class="item-groups" :style="{ maxHeight: tableHeight + 'px' }">
+    <n-scrollbar class="item-groups">
       <div v-for="group in groupedItems" :key="group.name" class="item-group">
         <h3 class="group-title">{{ group.name }} ({{ group.items.length }})</h3>
         <n-data-table
@@ -15,39 +15,23 @@
           :row-key="(row) => row._index"
         />
       </div>
-    </div>
+    </n-scrollbar>
   </section>
 </template>
 
 <script>
-import { h, computed, ref, onMounted, onUnmounted } from 'vue'
-import { NText, NDataTable, NInputNumber, NCheckbox } from 'naive-ui'
+import { h, computed, ref } from 'vue'
+import { NText, NDataTable, NInputNumber, NCheckbox, NScrollbar } from 'naive-ui'
 import { ItemNames, ItemGroups, ItemCategoryMap } from '../data/gameData.js'
 
 export default {
   name: 'ItemEditor',
-  components: { NText, NDataTable },
+  components: { NText, NDataTable, NScrollbar },
   props: { itemList: { type: Array, required: true } },
   setup(props) {
-    const tableHeight = ref(600)
     const isMounting = ref(true)
-    
-    const updateHeight = () => {
-      tableHeight.value = window.innerHeight - 200
-    }
 
-    onMounted(() => {
-      updateHeight()
-      window.addEventListener('resize', updateHeight)
-      
-      setTimeout(() => {
-        isMounting.value = false
-      }, 50)
-    })
-
-    onUnmounted(() => {
-      window.removeEventListener('resize', updateHeight)
-    })
+    setTimeout(() => { isMounting.value = false }, 50)
 
     const getItemName = (id) => ItemNames[id] || `物品#${id}`
     
@@ -123,7 +107,7 @@ export default {
       }
     ])
 
-    return { columns, tableHeight, isMounting, groupedItems }
+    return { columns, isMounting, groupedItems }
   }
 }
 </script>
@@ -150,8 +134,8 @@ export default {
   margin-bottom: 16px;
 }
 .item-groups {
-  overflow-y: auto;
   flex: 1;
+  min-height: 0;
 }
 .item-group {
   margin-bottom: 1.5rem;

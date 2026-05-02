@@ -6,12 +6,16 @@
     </div>
     
     <div class="table-panel table-panel--flat">
+      <div v-if="!isReady" class="table-loading-state">
+        <n-skeleton text :repeat="6" />
+      </div>
       <n-data-table
         :columns="columns"
-        :data="isMounting ? [] : skillList"
-        :loading="isMounting"
+        :data="visibleSkillList"
+        :loading="!isReady"
         :max-height="tableHeight"
         size="small"
+        virtual-scroll
         :row-key="(row, index) => index"
       />
     </div>
@@ -19,28 +23,28 @@
 </template>
 
 <script>
-import { h, computed, ref, onMounted } from 'vue'
-import { NText, NDataTable, NCheckbox } from 'naive-ui'
+import { h, computed } from 'vue'
+import { NText, NDataTable, NCheckbox, NSkeleton } from 'naive-ui'
 import { SkillNames } from '../data/gameData.js'
 import { useViewportTableHeight } from '../composables/useViewportTableHeight.js'
+import { useDeferredTableRender } from '../composables/useDeferredTableRender.js'
 
 export default {
   name: 'SkillEditor',
-  components: { NText, NDataTable },
+  components: { NText, NDataTable, NSkeleton },
   props: { skillList: { type: Array, required: true } },
-  setup() {
+  setup(props) {
     const { tableHeight } = useViewportTableHeight(280, 360)
-    const isMounting = ref(true)
-
-    onMounted(() => {
-      setTimeout(() => {
-        isMounting.value = false
-      }, 50)
-    })
+    const { isReady, visibleCount } = useDeferredTableRender(
+      computed(() => props.skillList.length),
+      { initialCount: 28, batchSize: 28 }
+    )
 
     const getSkillName = (id) => SkillNames[id] || `技能#${id}`
-    
-    const columns = computed(() => [
+
+    const visibleSkillList = computed(() => props.skillList.slice(0, visibleCount.value))
+
+    const columns = [
       {
         title: '技能名称 (ID)',
         key: 'name',
@@ -71,9 +75,9 @@ export default {
           })
         }
       }
-    ])
+    ]
 
-    return { columns, tableHeight, isMounting }
+    return { columns, tableHeight, isReady, visibleSkillList }
   }
 }
 </script>
@@ -81,6 +85,10 @@ export default {
 <style scoped>
 .table-panel--flat {
   min-height: 0;
+}
+
+.table-loading-state {
+  padding: 12px 0 4px;
 }
 </style>
 

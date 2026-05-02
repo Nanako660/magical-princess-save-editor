@@ -90,7 +90,7 @@
             :width="180"
             class="app-sider"
           >
-            <Sidebar v-model:active-tab="activeTab" :enabled="hasData" />
+            <Sidebar :active-tab="activeTab" :enabled="hasData" @update:active-tab="handleTabChange" />
           </n-layout-sider>
 
           <n-layout-content
@@ -99,19 +99,30 @@
             content-style="min-height: 100%; box-sizing: border-box;"
           >
             <div class="content-shell" :class="{ 'content-shell--wide': isWideTab }">
-              <BasicEditor v-if="activeTab === 'basic'" :status="saveData.status" />
-              <DetailedEditor v-if="activeTab === 'detailed'" :status="saveData.status" />
-              <EquipmentEditor v-if="activeTab === 'equipment'" :status="saveData.status" :item-list="saveData.itemDataParamList" />
-              <FriendEditor v-if="activeTab === 'npc'" :friend-list="saveData.friendDataParamList" />
-              <ItemEditor v-if="activeTab === 'items'" :item-list="saveData.itemDataParamList" @update:item-list="saveData.itemDataParamList = $event" />
-              <SkillEditor v-if="activeTab === 'skills'" :skill-list="saveData.skillDataParamList" @update:skill-list="saveData.skillDataParamList = $event" />
-              <GlobalEditor v-if="activeTab === 'global'" :gstatus="saveData.gstatus" />
-              <QuickActions v-if="activeTab === 'quick'" @execute="handleQuickAction" @query="handleQuery" />
-              <BattleArtsEditor v-if="activeTab === 'battlearts'" :arts-list="saveData.battleArtsDataParamList" @update:arts-list="saveData.battleArtsDataParamList = $event" />
-              <ActivityEditor v-if="activeTab === 'activity'" :activity-list="saveData.activityDataParamList" @update:activity-list="saveData.activityDataParamList = $event" />
-              <CurriculumEditor v-if="activeTab === 'curriculum'" :curriculum-list="saveData.curriculumDataParamList" @update:curriculum-list="saveData.curriculumDataParamList = $event" />
-              <ConfigEditor v-if="activeTab === 'config' && configData" :config="configData" />
-              <DeviceEditor v-if="activeTab === 'device' && deviceData" :device="deviceData" />
+              <transition name="tab-loading-fade">
+                <div v-if="isTabSwitching" class="tab-switch-overlay">
+                  <div class="tab-switch-loader">
+                    <div class="tab-switch-loader__bar">
+                      <span class="tab-switch-loader__bar-fill"></span>
+                    </div>
+                    <div class="tab-switch-loader__text">页面切换中...</div>
+                    <div class="tab-switch-loader__skeleton">
+                      <n-skeleton text :repeat="5" />
+                    </div>
+                  </div>
+                </div>
+              </transition>
+              <transition name="tab-content-fade" mode="out-in">
+                <keep-alive>
+                  <component
+                    :is="currentTabComponent"
+                    v-if="currentTabComponent"
+                    :key="renderedTab"
+                    v-bind="currentTabProps"
+                    v-on="currentTabListeners"
+                  />
+                </keep-alive>
+              </transition>
             </div>
           </n-layout-content>
         </n-layout>
@@ -140,7 +151,7 @@
 import { ref, computed } from 'vue'
 import {
   NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
-  NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal,
+  NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal, NSkeleton,
   darkTheme, createDiscreteApi
 } from 'naive-ui'
 import { FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline } from '@vicons/ionicons5'
@@ -169,7 +180,7 @@ export default {
 
   components: {
     NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
-    NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal,
+    NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal, NSkeleton,
     FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline,
     SetupGuide, Sidebar, BasicEditor, DetailedEditor, EquipmentEditor,
     FriendEditor, ItemEditor, SkillEditor, GlobalEditor, QuickActions,
@@ -195,10 +206,100 @@ export default {
     const { getActionInfo, executeAction } = useQuickActions(saveData)
 
     const activeTab = ref('quick')
+    const renderedTab = ref('quick')
+    const isTabSwitching = ref(false)
     const isSaving = ref(false)
     const slotPopoverShow = ref(false)
     const showSaveModal = ref(false)
     const wideTabs = new Set(['items', 'skills', 'battlearts', 'activity', 'curriculum'])
+    let switchFrameId = null
+
+    const clearPendingTabSwitch = () => {
+      if (switchFrameId !== null) {
+        cancelAnimationFrame(switchFrameId)
+        switchFrameId = null
+      }
+    }
+
+    const completeTabSwitch = (tab) => {
+      renderedTab.value = tab
+      isTabSwitching.value = false
+    }
+
+    const handleTabChange = (tab) => {
+      if (!hasData.value || tab === activeTab.value) return
+      activeTab.value = tab
+      clearPendingTabSwitch()
+      isTabSwitching.value = true
+      switchFrameId = requestAnimationFrame(() => {
+        switchFrameId = requestAnimationFrame(() => {
+          completeTabSwitch(tab)
+          switchFrameId = null
+        })
+      })
+    }
+
+    const currentTabComponent = computed(() => {
+      if (!hasData.value) return null
+      if (renderedTab.value === 'config' && !configData.value) return null
+      if (renderedTab.value === 'device' && !deviceData.value) return null
+      return {
+        quick: QuickActions,
+        basic: BasicEditor,
+        detailed: DetailedEditor,
+        equipment: EquipmentEditor,
+        npc: FriendEditor,
+        items: ItemEditor,
+        skills: SkillEditor,
+        global: GlobalEditor,
+        battlearts: BattleArtsEditor,
+        activity: ActivityEditor,
+        curriculum: CurriculumEditor,
+        config: ConfigEditor,
+        device: DeviceEditor
+      }[renderedTab.value] || null
+    })
+
+    const currentTabProps = computed(() => {
+      if (!saveData.value) return {}
+      return {
+        quick: {},
+        basic: { status: saveData.value.status },
+        detailed: { status: saveData.value.status },
+        equipment: { status: saveData.value.status, itemList: saveData.value.itemDataParamList },
+        npc: { friendList: saveData.value.friendDataParamList },
+        items: { itemList: saveData.value.itemDataParamList },
+        skills: { skillList: saveData.value.skillDataParamList },
+        global: { gstatus: saveData.value.gstatus },
+        battlearts: { artsList: saveData.value.battleArtsDataParamList },
+        activity: { activityList: saveData.value.activityDataParamList },
+        curriculum: { curriculumList: saveData.value.curriculumDataParamList },
+        config: configData.value ? { config: configData.value } : {},
+        device: deviceData.value ? { device: deviceData.value } : {}
+      }[renderedTab.value] || {}
+    })
+
+    const currentTabListeners = computed(() => ({
+      quick: {
+        execute: handleQuickAction,
+        query: handleQuery
+      },
+      items: {
+        'update:item-list': ($event) => { saveData.value.itemDataParamList = $event }
+      },
+      skills: {
+        'update:skill-list': ($event) => { saveData.value.skillDataParamList = $event }
+      },
+      battlearts: {
+        'update:arts-list': ($event) => { saveData.value.battleArtsDataParamList = $event }
+      },
+      activity: {
+        'update:activity-list': ($event) => { saveData.value.activityDataParamList = $event }
+      },
+      curriculum: {
+        'update:curriculum-list': ($event) => { saveData.value.curriculumDataParamList = $event }
+      }
+    }[renderedTab.value] || {}))
 
     const footerText = computed(() => {
       if (!saveData.value) return ''
@@ -224,6 +325,8 @@ export default {
       await loadSlot(slot)
       if (!error.value && hasData.value) {
         activeTab.value = 'quick'
+        renderedTab.value = 'quick'
+        isTabSwitching.value = false
         message.success(`已加载 ${slot.name}`)
       } else if (error.value) {
         message.error(`加载失败: ${error.value}`)
@@ -273,13 +376,13 @@ export default {
 
     return {
       darkTheme, logoSrc, appVersion,
-      saveData, isLoading, fileName, activeTab, hasData, footerText, isWideTab,
+      saveData, isLoading, fileName, activeTab, renderedTab, hasData, footerText, isWideTab,
       dirReady, dirName, saveSlots, slotPopoverShow, isSaving,
-      showSaveModal,
+      showSaveModal, isTabSwitching, currentTabComponent, currentTabProps, currentTabListeners,
       indexData, configData, deviceData,
       indexFileName, configFileName, deviceFileName,
       handlePickDir, handleLoadSlot, openSaveModal, handleSave, handleBack,
-      handleQuery, handleQuickAction, handleReset, formatSize
+      handleQuery, handleQuickAction, handleReset, formatSize, handleTabChange
     }
   }
 }
@@ -348,6 +451,7 @@ html, body, #app {
 }
 
 .content-shell {
+  position: relative;
   width: min(var(--page-max-width), calc(100% - (var(--page-gutter) * 2)));
   min-height: 100%;
   margin: 0 auto;
@@ -495,6 +599,90 @@ html, body, #app {
 .page-table .n-table td {
   white-space: normal;
   word-break: break-word;
+}
+
+.tab-switch-overlay {
+  position: absolute;
+  inset: 24px 0 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.tab-switch-loader {
+  width: min(520px, calc(100% - 32px));
+  padding: 18px 20px 16px;
+  border: 1px solid rgba(94, 234, 212, 0.2);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.88) 100%);
+  box-shadow:
+    0 18px 48px rgba(2, 6, 23, 0.4),
+    0 0 0 1px rgba(14, 165, 233, 0.08) inset;
+  backdrop-filter: blur(10px);
+}
+
+.tab-switch-loader__bar {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.tab-switch-loader__bar-fill {
+  display: block;
+  width: 38%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #5eead4 0%, #0ea5e9 100%);
+  animation: tabSwitchBar 1s ease-in-out infinite;
+}
+
+.tab-switch-loader__text {
+  margin: 12px 0 14px;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.tab-switch-loader__skeleton {
+  opacity: 0.82;
+}
+
+.tab-loading-fade-enter-active,
+.tab-loading-fade-leave-active,
+.tab-content-fade-enter-active,
+.tab-content-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tab-loading-fade-enter-from,
+.tab-loading-fade-leave-to,
+.tab-content-fade-enter-from,
+.tab-content-fade-leave-to {
+  opacity: 0;
+}
+
+.tab-loading-fade-enter-from,
+.tab-content-fade-enter-from {
+  transform: translateY(6px);
+}
+
+.tab-loading-fade-leave-to,
+.tab-content-fade-leave-to {
+  transform: translateY(-4px);
+}
+
+@keyframes tabSwitchBar {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
 }
 
 @media (max-width: 900px) {

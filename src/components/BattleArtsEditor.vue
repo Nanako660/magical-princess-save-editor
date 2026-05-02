@@ -11,6 +11,9 @@
     
     <n-card title="技能列表" size="small">
       <n-scrollbar class="table-scroll-shell" :style="{ maxHeight: `${tableHeight}px` }">
+        <div v-if="!isReady" class="table-loading-state">
+          <n-skeleton text :repeat="5" />
+        </div>
         <n-table :bordered="false" :single-line="false" size="small">
           <thead>
             <tr>
@@ -20,7 +23,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="arts in sortedArts" :key="arts.battleArtsId">
+            <tr v-for="arts in visibleArts" :key="arts.battleArtsId">
               <td>{{ arts.battleArtsId }}</td>
               <td>{{ getArtsName(arts.battleArtsId) }}</td>
               <td>
@@ -36,13 +39,14 @@
 
 <script>
 import { computed } from 'vue'
-import { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch } from 'naive-ui'
+import { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch, NSkeleton } from 'naive-ui'
 import { BattleArtsNames } from '../data/gameData.js'
 import { useViewportTableHeight } from '../composables/useViewportTableHeight.js'
+import { useDeferredTableRender } from '../composables/useDeferredTableRender.js'
 
 export default {
   name: 'BattleArtsEditor',
-  components: { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch },
+  components: { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch, NSkeleton },
   props: {
     artsList: { type: Array, required: true }
   },
@@ -52,6 +56,11 @@ export default {
     const sortedArts = computed(() => {
       return [...props.artsList].sort((a, b) => a.battleArtsId - b.battleArtsId)
     })
+    const { isReady, visibleCount } = useDeferredTableRender(
+      computed(() => sortedArts.value.length),
+      { initialCount: 20, batchSize: 20 }
+    )
+    const visibleArts = computed(() => sortedArts.value.slice(0, visibleCount.value))
     
     const getArtsName = (id) => {
       return BattleArtsNames[id] || `未知技能(${id})`
@@ -73,7 +82,13 @@ export default {
       emit('update:artsList', updated)
     }
     
-    return { sortedArts, getArtsName, learnAllArts, resetAllArts, tableHeight }
+    return { visibleArts, getArtsName, learnAllArts, resetAllArts, tableHeight, isReady }
   }
 }
 </script>
+
+<style scoped>
+.table-loading-state {
+  padding-bottom: 8px;
+}
+</style>

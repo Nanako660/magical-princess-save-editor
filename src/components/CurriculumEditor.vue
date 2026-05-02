@@ -11,6 +11,9 @@
     
     <n-card title="课程列表" size="small">
       <n-scrollbar class="table-scroll-shell" :style="{ maxHeight: `${tableHeight}px` }">
+        <div v-if="!isReady" class="table-loading-state">
+          <n-skeleton text :repeat="6" />
+        </div>
         <n-table :bordered="false" :single-line="false" size="small">
           <thead>
             <tr>
@@ -22,7 +25,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="curriculum in sortedCurriculums" :key="curriculum.curriculumId">
+            <tr v-for="curriculum in visibleCurriculums" :key="curriculum.curriculumId">
               <td>{{ curriculum.curriculumId }}</td>
               <td>{{ getCurriculumName(curriculum.curriculumId) }}</td>
               <td>
@@ -48,13 +51,14 @@
 
 <script>
 import { computed } from 'vue'
-import { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch, NInputNumber } from 'naive-ui'
+import { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch, NInputNumber, NSkeleton } from 'naive-ui'
 import { CurriculumNames } from '../data/gameData.js'
 import { useViewportTableHeight } from '../composables/useViewportTableHeight.js'
+import { useDeferredTableRender } from '../composables/useDeferredTableRender.js'
 
 export default {
   name: 'CurriculumEditor',
-  components: { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch, NInputNumber },
+  components: { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch, NInputNumber, NSkeleton },
   props: {
     curriculumList: { type: Array, required: true }
   },
@@ -64,6 +68,11 @@ export default {
     const sortedCurriculums = computed(() => {
       return [...props.curriculumList].sort((a, b) => a.curriculumId - b.curriculumId)
     })
+    const { isReady, visibleCount } = useDeferredTableRender(
+      computed(() => sortedCurriculums.value.length),
+      { initialCount: 24, batchSize: 24 }
+    )
+    const visibleCurriculums = computed(() => sortedCurriculums.value.slice(0, visibleCount.value))
     
     const getCurriculumName = (id) => {
       return CurriculumNames[id] || `未知课程(${id})`
@@ -89,7 +98,13 @@ export default {
       emit('update:curriculumList', updated)
     }
     
-    return { sortedCurriculums, getCurriculumName, completeAll, resetAll, tableHeight }
+    return { visibleCurriculums, getCurriculumName, completeAll, resetAll, tableHeight, isReady }
   }
 }
 </script>
+
+<style scoped>
+.table-loading-state {
+  padding-bottom: 8px;
+}
+</style>

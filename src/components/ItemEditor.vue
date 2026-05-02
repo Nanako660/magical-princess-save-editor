@@ -7,12 +7,17 @@
     
     <div class="table-panel table-panel--flat">
       <n-scrollbar class="item-groups table-scroll-shell" :style="{ maxHeight: `${tableHeight}px` }">
-        <div v-for="group in groupedItems" :key="group.name" class="item-group">
+        <div v-for="(group, index) in groupedItems" :key="group.name" class="item-group">
           <h3 class="group-title">{{ group.name }} ({{ group.items.length }})</h3>
+          <div v-if="!isReady || index >= visibleGroupCount" class="group-loading-state">
+            <n-skeleton text :repeat="2" />
+          </div>
           <n-data-table
+            v-else
             :columns="columns"
-            :data="isMounting ? [] : group.items"
+            :data="group.items"
             size="small"
+            virtual-scroll
             :row-key="(row) => row._index"
           />
         </div>
@@ -22,48 +27,46 @@
 </template>
 
 <script>
-import { h, computed, ref } from 'vue'
-import { NText, NDataTable, NInputNumber, NCheckbox, NScrollbar } from 'naive-ui'
+import { h, computed } from 'vue'
+import { NText, NDataTable, NInputNumber, NCheckbox, NScrollbar, NSkeleton } from 'naive-ui'
 import { ItemNames, ItemGroups, ItemCategoryMap } from '../data/gameData.js'
 import { useViewportTableHeight } from '../composables/useViewportTableHeight.js'
+import { useDeferredTableRender } from '../composables/useDeferredTableRender.js'
+
+const ITEM_GROUP_NAME_BY_ID = Object.fromEntries(
+  Object.entries(ItemCategoryMap).map(([itemId, category]) => {
+    const group = ItemGroups.find((entry) => entry.category === category)
+    return [itemId, group?.name || '未分类']
+  })
+)
 
 export default {
   name: 'ItemEditor',
-  components: { NText, NDataTable, NScrollbar },
+  components: { NText, NDataTable, NScrollbar, NSkeleton },
   props: { itemList: { type: Array, required: true } },
   setup(props) {
     const { tableHeight } = useViewportTableHeight(280, 360)
-    const isMounting = ref(true)
-
-    setTimeout(() => { isMounting.value = false }, 50)
-
-    const getItemName = (id) => ItemNames[id] || `物品#${id}`
-    
-    const getItemGroup = (itemId) => {
-      const cat = ItemCategoryMap[itemId]
-      if (cat !== undefined) {
-        const group = ItemGroups.find(g => g.category === cat)
-        if (group) return group.name
-      }
-      return '未分类'
-    }
-
     const groupedItems = computed(() => {
-      const groups = ItemGroups.map(g => ({ name: g.name, items: [] }))
-      const groupMap = {}
-      groups.forEach(g => { groupMap[g.name] = g })
-      
+      const groups = ItemGroups.map((group) => ({ name: group.name, items: [] }))
+      const groupMap = Object.fromEntries(groups.map((group) => [group.name, group]))
+
       props.itemList.forEach((item, index) => {
-        const groupName = getItemGroup(item.itemId)
+        const groupName = ITEM_GROUP_NAME_BY_ID[item.itemId] || '未分类'
         if (groupMap[groupName]) {
           groupMap[groupName].items.push({ ...item, _index: index })
         }
       })
-      
-      return groups.filter(g => g.items.length > 0)
+
+      return groups.filter((group) => group.items.length > 0)
     })
-    
-    const columns = computed(() => [
+    const { isReady, visibleCount: visibleGroupCount } = useDeferredTableRender(
+      computed(() => groupedItems.value.length),
+      { initialCount: 2, batchSize: 1, batchDelay: 24 }
+    )
+
+    const getItemName = (id) => ItemNames[id] || `物品#${id}`
+
+    const columns = [
       {
         title: '物品名称 (ID)',
         key: 'name',
@@ -111,9 +114,9 @@ export default {
           })
         }
       }
-    ])
+    ]
 
-    return { columns, isMounting, groupedItems, tableHeight }
+    return { columns, groupedItems, isReady, visibleGroupCount, tableHeight }
   }
 }
 </script>
@@ -132,5 +135,9 @@ export default {
 
 .table-panel--flat {
   min-height: 0;
+}
+
+.group-loading-state {
+  padding: 4px 0 8px;
 }
 </style>

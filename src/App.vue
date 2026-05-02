@@ -5,7 +5,7 @@
       <!-- 顶栏 -->
       <n-layout-header bordered class="app-header">
         <div class="header-inner">
-          <h1>Magical Princess 存档编辑器</h1>
+          <h1><img :src="logoSrc" alt="Magical Princess" class="header-logo" /> <span class="header-title">存档编辑器</span></h1>
 
           <div v-if="dirReady" class="header-actions">
             <n-popover trigger="click" placement="bottom-end" :show="slotPopoverShow" @update:show="slotPopoverShow = $event">
@@ -133,6 +133,7 @@ import {
 import { FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline } from '@vicons/ionicons5'
 import { useSaveData } from './composables/useSaveData.js'
 import { useQuickActions } from './composables/useQuickActions.js'
+import logoSrc from './assets/logo.png'
 
 import SetupGuide from './components/SetupGuide.vue'
 import Sidebar from './components/Sidebar.vue'
@@ -241,7 +242,7 @@ export default {
     }
 
     return {
-      darkTheme,
+      darkTheme, logoSrc,
       saveData, isLoading, fileName, activeTab, hasData, footerText,
       dirReady, dirName, saveSlots, slotPopoverShow, isSaving,
       showSaveModal,
@@ -276,10 +277,22 @@ html, body, #app {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo {
+  height: calc(72px - 16px);
+  width: auto;
+  display: block;
+}
+
+.header-title {
   background: linear-gradient(180deg, #5EEAD4 0%, #0EA5E9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  white-space: nowrap;
   text-shadow: 0 0 20px rgba(94, 234, 212, 0.3);
   filter: drop-shadow(0 0 10px rgba(14, 165, 233, 0.2));
 }

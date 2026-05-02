@@ -3,8 +3,8 @@ export const BasicStatusLabels = {
   // 基础资源
   period: '当前月份',
   stress: '压力',
-  money: '金钱',
-  moneyGetTotal: '累计获得金钱',
+  money: '财产',
+  moneyGetTotal: '累计获得财产',
   blackCoin: '东亚硬币',
   blackCoinGettedFromDice: '骰子获得东亚硬币',
   activePower: '行动力',

@@ -1,6 +1,6 @@
 <template>
   <section class="editor-section">
-    <h2 class="section-title">跨轮回数据</h2>
+    <h2 class="section-title">轮回数据</h2>
     <div class="card-grid global-grid">
       <div class="card-grid-item card-grid-item--half">
         <n-card title="角色资料" size="small" class="editor-panel">
@@ -34,7 +34,7 @@
               <n-form-item-gi :span="12" label="轮回次数">
                 <n-input-number v-model:value="gstatus.loopCount" :min="1" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="成就点数">
+              <n-form-item-gi :span="12" label="功绩点数">
                 <n-input-number v-model:value="gstatus.acvPoint" :min="0" />
               </n-form-item-gi>
               <n-form-item-gi :span="12" label="玩家生日月">

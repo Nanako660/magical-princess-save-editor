@@ -32,6 +32,6 @@ export default defineConfig({
     chunkSizeWarningLimit: 100000000,
     cssCodeSplit: false,
     cssMinify: true,
-    minify: false
+    minify: 'esbuild'
   }
 })

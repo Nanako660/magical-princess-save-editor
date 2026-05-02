@@ -34,7 +34,7 @@
               <n-form-item-gi :span="12" label="技能等级">
                 <n-input-number v-model:value="status.levelArts" :min="1" :max="18" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="魔法等级">
+              <n-form-item-gi :span="12" label="魔术等级">
                 <n-input-number v-model:value="status.levelMagic" :min="1" :max="18" />
               </n-form-item-gi>
               <n-form-item-gi :span="12" label="战斗经验">
@@ -58,7 +58,7 @@
               <n-form-item-gi :span="12" label="生命">
                 <n-input-number v-model:value="status.phySeimei" :min="0" :max="9999" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="精神">
+              <n-form-item-gi :span="12" label="意志">
                 <n-input-number v-model:value="status.phyKonjyo" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="12" label="敏捷">
@@ -82,7 +82,7 @@
               <n-form-item-gi :span="12" label="算术">
                 <n-input-number v-model:value="status.intSanjyutsu" :min="0" :max="9999" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="魔法">
+              <n-form-item-gi :span="12" label="魔术">
                 <n-input-number v-model:value="status.intMajyutsu" :min="0" :max="9999" />
               </n-form-item-gi>
               <n-form-item-gi :span="12" label="信仰">
@@ -124,16 +124,16 @@
               <n-form-item-gi :span="12" label="感性经验">
                 <n-input-number v-model:value="status.valueSense" :min="0" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="创造">
+              <n-form-item-gi :span="12" label="想象">
                 <n-input-number v-model:value="status.senSouzou" :min="0" :max="9999" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="创作">
+              <n-form-item-gi :span="12" label="创意">
                 <n-input-number v-model:value="status.senSousaku" :min="0" :max="9999" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="直感">
+              <n-form-item-gi :span="12" label="音乐">
                 <n-input-number v-model:value="status.senOnkan" :min="0" :max="9999" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="美感">
+              <n-form-item-gi :span="12" label="美术">
                 <n-input-number v-model:value="status.senBikan" :min="0" :max="9999" />
               </n-form-item-gi>
             </n-grid>

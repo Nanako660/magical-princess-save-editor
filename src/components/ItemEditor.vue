@@ -5,31 +5,31 @@
       <n-text depth="3" class="item-count">共 {{ itemList.length }} 个物品</n-text>
     </div>
     
-    <n-card title="物品列表" size="small" class="table-panel">
+    <div class="table-panel table-panel--flat">
       <n-scrollbar class="item-groups table-scroll-shell" :style="{ maxHeight: `${tableHeight}px` }">
-      <div v-for="group in groupedItems" :key="group.name" class="item-group">
-        <h3 class="group-title">{{ group.name }} ({{ group.items.length }})</h3>
+        <div v-for="group in groupedItems" :key="group.name" class="item-group">
+          <h3 class="group-title">{{ group.name }} ({{ group.items.length }})</h3>
           <n-data-table
             :columns="columns"
             :data="isMounting ? [] : group.items"
             size="small"
             :row-key="(row) => row._index"
           />
-      </div>
+        </div>
       </n-scrollbar>
-    </n-card>
+    </div>
   </section>
 </template>
 
 <script>
 import { h, computed, ref } from 'vue'
-import { NText, NDataTable, NInputNumber, NCheckbox, NScrollbar, NCard } from 'naive-ui'
+import { NText, NDataTable, NInputNumber, NCheckbox, NScrollbar } from 'naive-ui'
 import { ItemNames, ItemGroups, ItemCategoryMap } from '../data/gameData.js'
 import { useViewportTableHeight } from '../composables/useViewportTableHeight.js'
 
 export default {
   name: 'ItemEditor',
-  components: { NText, NDataTable, NScrollbar, NCard },
+  components: { NText, NDataTable, NScrollbar },
   props: { itemList: { type: Array, required: true } },
   setup(props) {
     const { tableHeight } = useViewportTableHeight(280, 360)
@@ -127,6 +127,10 @@ export default {
 }
 
 .item-groups {
+  min-height: 0;
+}
+
+.table-panel--flat {
   min-height: 0;
 }
 </style>

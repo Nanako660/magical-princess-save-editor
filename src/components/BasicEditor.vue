@@ -12,7 +12,7 @@
                   <n-input-group-label>{{ periodText }}</n-input-group-label>
                 </n-input-group>
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="金钱">
+              <n-form-item-gi :span="12" label="财产">
                 <n-input-number v-model:value="status.money" :min="0" :max="9999999" />
               </n-form-item-gi>
               <n-form-item-gi :span="12" label="东亚硬币">
@@ -36,19 +36,19 @@
               <n-form-item-gi :span="12" label="压力">
                 <n-input-number v-model:value="status.stress" :min="0" :max="100" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="善行值">
+              <n-form-item-gi :span="12" label="善行">
                 <n-input-number v-model:value="status.goodAction" :min="1" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="恶行值">
+              <n-form-item-gi :span="12" label="恶行">
                 <n-input-number v-model:value="status.badAction" :min="1" />
               </n-form-item-gi>
               <n-form-item-gi :span="12" label="善恶平衡">
                 <n-input-number v-model:value="status.gbBalance" :min="0" :max="100" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="声望">
+              <n-form-item-gi :span="12" label="名声">
                 <n-input-number v-model:value="status.reputation" :min="0" :max="9999" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="技能点">
+              <n-form-item-gi :span="12" label="技能点数">
                 <n-input-number v-model:value="status.skillPoint" :min="0" :max="9999" />
               </n-form-item-gi>
             </n-grid>
@@ -63,7 +63,7 @@
               <n-form-item-gi span="24" label="学院职业">
                 <n-select v-model:value="status.acClass" :options="academyOptions" />
               </n-form-item-gi>
-              <n-form-item-gi :span="12" label="父亲好感度">
+              <n-form-item-gi :span="12" label="父女感情">
                 <n-input-number v-model:value="status.fatherFavarite" :min="0" :max="100" />
               </n-form-item-gi>
               <n-form-item-gi :span="12" label="父爱等级">

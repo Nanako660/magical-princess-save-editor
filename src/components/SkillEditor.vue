@@ -5,7 +5,7 @@
       <n-text depth="3" class="skill-count">共 {{ skillList.length }} 个技能</n-text>
     </div>
     
-    <n-card title="技能列表" size="small" class="table-panel">
+    <div class="table-panel table-panel--flat">
       <n-data-table
         :columns="columns"
         :data="isMounting ? [] : skillList"
@@ -14,19 +14,19 @@
         size="small"
         :row-key="(row, index) => index"
       />
-    </n-card>
+    </div>
   </section>
 </template>
 
 <script>
 import { h, computed, ref, onMounted } from 'vue'
-import { NText, NDataTable, NCheckbox, NCard } from 'naive-ui'
+import { NText, NDataTable, NCheckbox } from 'naive-ui'
 import { SkillNames } from '../data/gameData.js'
 import { useViewportTableHeight } from '../composables/useViewportTableHeight.js'
 
 export default {
   name: 'SkillEditor',
-  components: { NText, NDataTable, NCard },
+  components: { NText, NDataTable },
   props: { skillList: { type: Array, required: true } },
   setup() {
     const { tableHeight } = useViewportTableHeight(280, 360)
@@ -77,4 +77,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.table-panel--flat {
+  min-height: 0;
+}
+</style>
 

@@ -260,7 +260,7 @@ export default {
     }
 
     const currentTabComponent = computed(() => {
-      if (!hasData.value && renderedTab.value !== 'config') return null
+      if (!hasData.value && !['quick', 'config'].includes(renderedTab.value)) return null
       if (renderedTab.value === 'config' && configLoadState.value !== 'ready') return null
       return {
         quick: QuickActions,
@@ -299,9 +299,11 @@ export default {
       if (renderedTab.value === 'config') {
         return configData.value ? { config: configData.value } : {}
       }
+      if (renderedTab.value === 'quick') {
+        return { disabled: !hasData.value }
+      }
       if (!saveData.value) return {}
       return {
-        quick: {},
         basic: { status: saveData.value.status },
         detailed: { status: saveData.value.status },
         equipment: { status: saveData.value.status, itemList: saveData.value.itemDataParamList },
@@ -350,7 +352,7 @@ export default {
 
     const appVersion = __APP_VERSION__
     const isWideTab = computed(() => wideTabs.has(activeTab.value))
-    const showPreSaveEmptyState = computed(() => dirReady.value && !hasData.value && activeTab.value !== 'config')
+    const showPreSaveEmptyState = computed(() => dirReady.value && !hasData.value && !['quick', 'config'].includes(activeTab.value))
     const showApplyButton = computed(() => dirReady.value && (hasData.value || configLoadState.value === 'ready'))
     const saveModalText = computed(() => {
       if (hasData.value && fileName.value) {

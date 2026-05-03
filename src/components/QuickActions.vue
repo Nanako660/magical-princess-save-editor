@@ -30,6 +30,13 @@
     </n-alert>
     
     <h3 class="subsection-title">快捷操作</h3>
+    <n-alert
+      v-if="disabled"
+      type="info"
+      style="margin-bottom: 16px;"
+    >
+      先从顶栏选择一个存档后才能使用快捷操作。
+    </n-alert>
 
     <div class="quick-actions-columns">
       <n-card size="small" class="quick-actions-panel">
@@ -37,19 +44,19 @@
           <section class="quick-action-group">
             <h4 class="quick-action-group__title">属性快捷</h4>
             <n-grid :cols="2" :x-gap="6" :y-gap="6" class="quick-action-buttons">
-              <n-gi><n-button class="quick-action-button" @click="confirmAction('maxAllStats')" type="warning" ghost>一键满属性</n-button></n-gi>
-              <n-gi><n-button class="quick-action-button" @click="confirmAction('maxMoney')" type="warning" ghost>金钱最大化</n-button></n-gi>
-              <n-gi><n-button class="quick-action-button" @click="confirmAction('clearStress')" type="warning" ghost>压力清零</n-button></n-gi>
-              <n-gi><n-button class="quick-action-button" @click="confirmAction('maxActionPower')" type="warning" ghost>行动力全满</n-button></n-gi>
-              <n-gi span="2"><n-button class="quick-action-button" @click="confirmAction('maxBlackCoin')" type="warning" ghost>东亚硬币最大化</n-button></n-gi>
+              <n-gi><n-button class="quick-action-button" :disabled="disabled" @click="confirmAction('maxAllStats')" type="warning" ghost>一键满属性</n-button></n-gi>
+              <n-gi><n-button class="quick-action-button" :disabled="disabled" @click="confirmAction('maxMoney')" type="warning" ghost>金钱最大化</n-button></n-gi>
+              <n-gi><n-button class="quick-action-button" :disabled="disabled" @click="confirmAction('clearStress')" type="warning" ghost>压力清零</n-button></n-gi>
+              <n-gi><n-button class="quick-action-button" :disabled="disabled" @click="confirmAction('maxActionPower')" type="warning" ghost>行动力全满</n-button></n-gi>
+              <n-gi span="2"><n-button class="quick-action-button" :disabled="disabled" @click="confirmAction('maxBlackCoin')" type="warning" ghost>东亚硬币最大化</n-button></n-gi>
             </n-grid>
           </section>
 
           <section class="quick-action-group">
             <h4 class="quick-action-group__title">善恶快捷</h4>
             <n-grid :cols="2" :x-gap="6" :y-gap="6" class="quick-action-buttons">
-              <n-gi><n-button class="quick-action-button" @click="confirmAction('maxGoodAction')" type="warning" ghost>善行最大化</n-button></n-gi>
-              <n-gi><n-button class="quick-action-button" @click="confirmAction('maxBadAction')" type="warning" ghost>恶行最大化</n-button></n-gi>
+              <n-gi><n-button class="quick-action-button" :disabled="disabled" @click="confirmAction('maxGoodAction')" type="warning" ghost>善行最大化</n-button></n-gi>
+              <n-gi><n-button class="quick-action-button" :disabled="disabled" @click="confirmAction('maxBadAction')" type="warning" ghost>恶行最大化</n-button></n-gi>
             </n-grid>
           </section>
         </div>
@@ -60,8 +67,8 @@
           <section class="quick-action-group">
             <h4 class="quick-action-group__title">时间快捷</h4>
             <n-grid :cols="2" :x-gap="6" :y-gap="6" class="quick-action-buttons">
-              <n-gi><n-button class="quick-action-button" @click="confirmAction('setMonth42')" type="warning" ghost>跳到最终月</n-button></n-gi>
-              <n-gi><n-button class="quick-action-button" @click="confirmAction('resetToMonth0')" type="warning" ghost>重置到初始月</n-button></n-gi>
+              <n-gi><n-button class="quick-action-button" :disabled="disabled" @click="confirmAction('setMonth42')" type="warning" ghost>跳到最终月</n-button></n-gi>
+              <n-gi><n-button class="quick-action-button" :disabled="disabled" @click="confirmAction('resetToMonth0')" type="warning" ghost>重置到初始月</n-button></n-gi>
             </n-grid>
           </section>
 
@@ -69,14 +76,14 @@
             <section class="quick-action-group">
               <h4 class="quick-action-group__title">NPC快捷</h4>
               <n-grid :cols="2" :x-gap="6" :y-gap="6" class="quick-action-buttons">
-                <n-gi span="2"><n-button class="quick-action-button" @click="confirmAction('maxAllFavorability')" type="warning" ghost>全NPC满好感</n-button></n-gi>
+                <n-gi span="2"><n-button class="quick-action-button" :disabled="disabled" @click="confirmAction('maxAllFavorability')" type="warning" ghost>全NPC满好感</n-button></n-gi>
               </n-grid>
             </section>
 
             <section class="quick-action-group">
               <h4 class="quick-action-group__title">技能快捷</h4>
               <n-grid :cols="2" :x-gap="6" :y-gap="6" class="quick-action-buttons">
-                <n-gi span="2"><n-button class="quick-action-button" @click="confirmAction('unlockAllSkills')" type="warning" ghost>解锁全部技能</n-button></n-gi>
+                <n-gi span="2"><n-button class="quick-action-button" :disabled="disabled" @click="confirmAction('unlockAllSkills')" type="warning" ghost>解锁全部技能</n-button></n-gi>
               </n-grid>
             </section>
           </div>
@@ -105,18 +112,22 @@
 
 <script>
 import { ref } from 'vue'
-import { NGrid, NGi, NCard, NButton, NAlert, NModal, NText, NIcon } from 'naive-ui'
+import { NGrid, NGi, NCard, NButton, NAlert, NModal, NText, NIcon, NSpace } from 'naive-ui'
 import { HelpCircleOutline, WarningOutline } from '@vicons/ionicons5'
 
 export default {
   name: 'QuickActions',
-  components: { NGrid, NGi, NCard, NButton, NAlert, NModal, NText, NIcon, HelpCircleOutline, WarningOutline },
-  emits: ['execute'],
+  components: { NGrid, NGi, NCard, NButton, NAlert, NModal, NText, NIcon, NSpace, HelpCircleOutline, WarningOutline },
+  props: {
+    disabled: { type: Boolean, default: false }
+  },
+  emits: ['execute', 'query'],
   setup(props, { emit }) {
     const showModal = ref(false)
     const pendingAction = ref(null)
 
     const confirmAction = (action) => {
+      if (props.disabled) return
       emit('query', action, (info) => {
         if (info) {
           pendingAction.value = { action, ...info }

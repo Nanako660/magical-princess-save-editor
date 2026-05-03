@@ -47,7 +47,6 @@
           </div>
 
           <div v-if="dirReady" class="header-actions">
-
             <n-button v-if="showApplyButton" quaternary type="success" @click="openSaveModal">
               <template #icon><n-icon><SaveOutline /></n-icon></template>
               应用编辑
@@ -57,6 +56,22 @@
               <template #icon><n-icon><TrashOutline /></n-icon></template>
               重置
             </n-button>
+
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-button
+                  quaternary
+                  circle
+                  type="default"
+                  size="small"
+                  :disabled="!githubUrl"
+                  @click="openProjectLink"
+                >
+                  <template #icon><n-icon><LogoGithub /></n-icon></template>
+                </n-button>
+              </template>
+              {{ githubUrl ? '打开项目地址' : '未配置 GitHub 地址' }}
+            </n-tooltip>
           </div>
         </div>
       </n-layout-header>
@@ -194,13 +209,14 @@
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import {
   NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
-  NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NModal, NSkeleton, NCard, NAlert,
+  NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NModal, NSkeleton, NCard, NAlert, NTooltip,
   darkTheme, createDiscreteApi
 } from 'naive-ui'
-import { FolderOpenOutline, SaveOutline, RefreshOutline, TrashOutline } from '@vicons/ionicons5'
+import { FolderOpenOutline, SaveOutline, RefreshOutline, TrashOutline, LogoGithub } from '@vicons/ionicons5'
 import { useSaveData } from './composables/useSaveData.js'
 import { useQuickActions } from './composables/useQuickActions.js'
 import logoSrc from './assets/logo.png'
+import packageInfo from '../package.json'
 
 import SetupGuide from './components/SetupGuide.vue'
 import Sidebar from './components/Sidebar.vue'
@@ -222,8 +238,8 @@ export default {
 
   components: {
     NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
-    NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NModal, NSkeleton, NCard, NAlert,
-    FolderOpenOutline, SaveOutline, RefreshOutline, TrashOutline,
+    NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NModal, NSkeleton, NCard, NAlert, NTooltip,
+    FolderOpenOutline, SaveOutline, RefreshOutline, TrashOutline, LogoGithub,
     SetupGuide, Sidebar, BasicEditor, DetailedEditor, EquipmentEditor,
     FriendEditor, ItemEditor, SkillEditor, GlobalEditor, QuickActions,
     ConfigEditor, BattleArtsEditor, ActivityEditor, CurriculumEditor
@@ -265,6 +281,7 @@ export default {
     let switchFrameId = null
     let suppressSaveTracking = false
     let suppressConfigTracking = false
+    const githubUrl = (packageInfo.projectLinks?.github || '').trim()
 
     const stableSerialize = (value) => {
       if (value === null || value === undefined) return ''
@@ -657,6 +674,11 @@ export default {
       message.success('目录配置已重置')
     }
 
+    const openProjectLink = () => {
+      if (!githubUrl) return
+      window.open(githubUrl, '_blank', 'noopener,noreferrer')
+    }
+
     watch(
       () => [configLoadState.value, stableSerialize(configData.value)],
       ([state, serialized]) => {
@@ -686,8 +708,9 @@ export default {
       isSaveDirty, isConfigDirty, hasPendingChanges, showUndoToast,
       configData,
       configLoadState, configLoadMessage,
+      githubUrl,
       handlePickDir, handleLoadSlot, openSaveModal, handleSave,
-      handleQuery, handleQuickAction, handleUndoLastChange, handleReset, openRefreshConfirm, handleRefreshAll, formatSize, handleTabChange
+      handleQuery, handleQuickAction, handleUndoLastChange, handleReset, openProjectLink, openRefreshConfirm, handleRefreshAll, formatSize, handleTabChange
     }
   }
 }

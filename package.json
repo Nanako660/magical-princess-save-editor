@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "projectLinks": {
+    "github": "https://github.com/Nanako660/magical-princess-save-editor"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

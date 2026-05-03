@@ -26,10 +26,13 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
 
+      - name: Rename build output
+        run: mv dist/index.html dist/magical-princess-save-editor-${{ steps.version.outputs.VERSION }}.html
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: v${{ steps.version.outputs.VERSION }}
-          files: dist/index.html
+          files: dist/magical-princess-save-editor-${{ steps.version.outputs.VERSION }}.html
           generate_release_notes: true

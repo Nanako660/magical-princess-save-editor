@@ -2,6 +2,8 @@
 
 一个用于编辑《Magical Princess》游戏存档的Web工具，基于 Vue 3 + Vite 构建。
 
+🔗 **在线使用**: [GitHub Pages](https://nanako660.github.io/magical-princess-save-editor/) | 📥 **离线版本**: [Releases](https://github.com/Nanako660/magical-princess-save-editor/releases)
+
 ## 项目架构
 
 ```

@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
   build-and-release:
@@ -38,19 +36,3 @@ jobs:
           name: v${{ steps.version.outputs.VERSION }}
           files: dist/magical-princess-save-editor-${{ steps.version.outputs.VERSION }}.html
           generate_release_notes: true
-
-      - name: Deploy to GitHub Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy-pages:
-    needs: build-and-release
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4

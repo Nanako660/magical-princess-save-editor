@@ -3,7 +3,6 @@ import {
   parseSaveFile, serializeSaveFile, getPeriodText,
   parseIndexFile, serializeIndexFile,
   parseConfigFile, serializeConfigFile,
-  parseDeviceFile, serializeDeviceFile,
   buildIndexParamsFromSaveData
 } from '../utils/saveParser.js'
 import { saveDirHandle, loadDirHandle, verifyPermission, clearDir } from '../utils/dirStore.js'
@@ -13,7 +12,6 @@ const hasFSA = typeof window.showOpenFilePicker === 'function'
 const SAVE_PATTERN = /^v10_userdata(\d+)\.dat$/i
 const INDEX_PATTERN = /^v10_indexdata\.dat$/i
 const CONFIG_PATTERN = /^v10_configdata\.dat$/i
-const DEVICE_PATTERN = /^v10_devicedata\.(cfg|dat)$/i
 
 export function useSaveData() {
   const saveData = ref(null)
@@ -28,19 +26,14 @@ export function useSaveData() {
   // 新增：索引、配置、设备数据
   const indexData = ref(null)
   const configData = ref(null)
-  const deviceData = ref(null)
   const configLoadState = ref('idle')
-  const deviceLoadState = ref('idle')
   const configLoadMessage = ref('')
-  const deviceLoadMessage = ref('')
   const indexFileName = ref('')
   const configFileName = ref('')
-  const deviceFileName = ref('')
 
   let dirHandle = null
   let indexFileHandle = null
   let configFileHandle = null
-  let deviceFileHandle = null
 
   async function restoreDir() {
     if (!hasFSA) return
@@ -96,10 +89,8 @@ export function useSaveData() {
     const slots = []
     indexFileHandle = null
     configFileHandle = null
-    deviceFileHandle = null
     indexFileName.value = ''
     configFileName.value = ''
-    deviceFileName.value = ''
     try {
       for await (const [name, fh] of dirHandle) {
         // 存档文件
@@ -128,14 +119,24 @@ export function useSaveData() {
           configFileHandle = fh
           configFileName.value = name
         }
-        // 设备文件
-        if (DEVICE_PATTERN.test(name) && fh.kind === 'file') {
-          deviceFileHandle = fh
-          deviceFileName.value = name
-        }
       }
       slots.sort((a, b) => a.slotId - b.slotId)
-      console.log('refreshSlots: found', slots.length, 'saves, index:', !!indexFileHandle, 'config:', !!configFileHandle, 'device:', !!deviceFileHandle)
+
+      if (!indexFileHandle) {
+        try {
+          indexFileHandle = await dirHandle.getFileHandle('v10_indexdata.dat')
+          indexFileName.value = 'v10_indexdata.dat'
+        } catch {}
+      }
+
+      if (!configFileHandle) {
+        try {
+          configFileHandle = await dirHandle.getFileHandle('v10_configdata.dat')
+          configFileName.value = 'v10_configdata.dat'
+        } catch {}
+      }
+
+      console.log('refreshSlots: found', slots.length, 'saves, index:', !!indexFileHandle, 'config:', !!configFileHandle)
     } catch (e) {
       console.error('refreshSlots error:', e)
     }
@@ -146,14 +147,6 @@ export function useSaveData() {
     } else if (configLoadState.value !== 'ready') {
       configLoadState.value = 'idle'
       configLoadMessage.value = ''
-    }
-    if (!deviceFileHandle) {
-      deviceData.value = null
-      deviceLoadState.value = 'missing'
-      deviceLoadMessage.value = '当前目录未找到设备设置文件 v10_devicedata.cfg 或 v10_devicedata.dat'
-    } else if (deviceLoadState.value !== 'ready') {
-      deviceLoadState.value = 'idle'
-      deviceLoadMessage.value = ''
     }
     saveSlots.value = slots
   }
@@ -199,11 +192,14 @@ export function useSaveData() {
   // 加载用户设置
   async function loadConfigData() {
     if (!configFileHandle) {
-      console.log('loadConfigData: no config file')
-      configData.value = null
-      configLoadState.value = 'missing'
-      configLoadMessage.value = '当前目录未找到用户设置文件 v10_configdata.dat'
-      return false
+      await refreshSlots()
+      if (!configFileHandle) {
+        console.log('loadConfigData: no config file')
+        configData.value = null
+        configLoadState.value = 'missing'
+        configLoadMessage.value = '当前目录未找到用户设置文件 v10_configdata.dat'
+        return false
+      }
     }
     isLoading.value = true
     configLoadState.value = 'loading'
@@ -222,38 +218,6 @@ export function useSaveData() {
       configLoadState.value = 'error'
       configLoadMessage.value = error.value
       console.error('loadConfigData error:', e)
-      return false
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  // 加载设备设置
-  async function loadDeviceData() {
-    if (!deviceFileHandle) {
-      console.log('loadDeviceData: no device file')
-      deviceData.value = null
-      deviceLoadState.value = 'missing'
-      deviceLoadMessage.value = '当前目录未找到设备设置文件 v10_devicedata.cfg 或 v10_devicedata.dat'
-      return false
-    }
-    isLoading.value = true
-    deviceLoadState.value = 'loading'
-    deviceLoadMessage.value = ''
-    try {
-      const file = await deviceFileHandle.getFile()
-      const content = await file.text()
-      deviceData.value = parseDeviceFile(content)
-      deviceLoadState.value = 'ready'
-      deviceLoadMessage.value = ''
-      console.log('loadDeviceData: loaded')
-      return true
-    } catch (e) {
-      error.value = '设备设置加载失败：' + e.message
-      deviceData.value = null
-      deviceLoadState.value = 'error'
-      deviceLoadMessage.value = error.value
-      console.error('loadDeviceData error:', e)
       return false
     } finally {
       isLoading.value = false
@@ -420,31 +384,6 @@ export function useSaveData() {
     }
   }
 
-  // 保存设备设置
-  const downloadDevice = async () => {
-    if (!deviceData.value) return false
-    try {
-      const content = serializeDeviceFile(deviceData.value)
-      if (dirHandle && deviceFileHandle) {
-        await writeToFile({ name: deviceFileName.value || 'v10_devicedata.cfg' }, content)
-        return true
-      }
-      // 下载方式
-      const blob = new Blob([content], { type: 'text/plain' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'v10_devicedata.cfg'
-      a.click()
-      URL.revokeObjectURL(url)
-      return true
-    } catch (e) {
-      error.value = '设备设置保存失败：' + e.message
-      console.error('downloadDevice error:', e)
-      return false
-    }
-  }
-
   const getMonthText = (period) => getPeriodText(period)
 
   const hasData = computed(() => saveData.value !== null && saveData.value.status !== undefined)
@@ -454,11 +393,8 @@ export function useSaveData() {
     fileName.value = ''
     error.value = null
     configData.value = null
-    deviceData.value = null
     configLoadState.value = configFileHandle ? 'idle' : 'missing'
-    deviceLoadState.value = deviceFileHandle ? 'idle' : 'missing'
     configLoadMessage.value = configFileHandle ? '' : '当前目录未找到用户设置文件 v10_configdata.dat'
-    deviceLoadMessage.value = deviceFileHandle ? '' : '当前目录未找到设备设置文件 v10_devicedata.cfg 或 v10_devicedata.dat'
   }
 
   const resetDir = async () => {
@@ -466,7 +402,6 @@ export function useSaveData() {
     dirHandle = null
     indexFileHandle = null
     configFileHandle = null
-    deviceFileHandle = null
     dirReady.value = false
     dirName.value = ''
     saveSlots.value = []
@@ -474,14 +409,10 @@ export function useSaveData() {
     fileName.value = ''
     indexData.value = null
     configData.value = null
-    deviceData.value = null
     configLoadState.value = 'idle'
-    deviceLoadState.value = 'idle'
     configLoadMessage.value = ''
-    deviceLoadMessage.value = ''
     indexFileName.value = ''
     configFileName.value = ''
-    deviceFileName.value = ''
     error.value = null
   }
 
@@ -490,14 +421,14 @@ export function useSaveData() {
   return {
     saveData, isLoading, fileName, error,
     dirReady, dirName, saveSlots,
-    indexData, configData, deviceData,
-    configLoadState, deviceLoadState,
-    configLoadMessage, deviceLoadMessage,
-    indexFileName, configFileName, deviceFileName,
+    indexData, configData,
+    configLoadState,
+    configLoadMessage,
+    indexFileName, configFileName,
     importSave, pickAndImportSave,
     pickDir, loadSlot, refreshSlots,
-    loadIndexData, loadConfigData, loadDeviceData,
-    exportSave, downloadSave, downloadConfig, downloadDevice,
+    loadIndexData, loadConfigData,
+    exportSave, downloadSave, downloadConfig,
     getMonthText, hasData, clearData, resetDir
   }
 }

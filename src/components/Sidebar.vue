@@ -20,7 +20,6 @@ import {
   StarOutline,
   SyncOutline,
   SettingsOutline,
-  DesktopOutline,
   FlashOutline,
   CalendarOutline,
   BookOutline
@@ -51,8 +50,7 @@ export default {
       { key: 'battlearts', label: '战斗技能', icon: renderIcon(FlashOutline) },
       { key: 'activity', label: '活动', icon: renderIcon(CalendarOutline) },
       { key: 'curriculum', label: '课程', icon: renderIcon(BookOutline) },
-      { key: 'config', label: '用户设置', icon: renderIcon(SettingsOutline) },
-      { key: 'device', label: '设备设置', icon: renderIcon(DesktopOutline) }
+      { key: 'config', label: '用户设置', icon: renderIcon(SettingsOutline) }
     ]
     
     const handleUpdateValue = (key) => {

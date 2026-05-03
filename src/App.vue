@@ -181,7 +181,6 @@ import SkillEditor from './components/SkillEditor.vue'
 import GlobalEditor from './components/GlobalEditor.vue'
 import QuickActions from './components/QuickActions.vue'
 import ConfigEditor from './components/ConfigEditor.vue'
-import DeviceEditor from './components/DeviceEditor.vue'
 import BattleArtsEditor from './components/BattleArtsEditor.vue'
 import ActivityEditor from './components/ActivityEditor.vue'
 import CurriculumEditor from './components/CurriculumEditor.vue'
@@ -195,7 +194,7 @@ export default {
     FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline,
     SetupGuide, Sidebar, BasicEditor, DetailedEditor, EquipmentEditor,
     FriendEditor, ItemEditor, SkillEditor, GlobalEditor, QuickActions,
-    ConfigEditor, DeviceEditor, BattleArtsEditor, ActivityEditor, CurriculumEditor
+    ConfigEditor, BattleArtsEditor, ActivityEditor, CurriculumEditor
   },
 
   setup() {
@@ -206,13 +205,13 @@ export default {
     const {
       saveData, isLoading, fileName, error,
       dirReady, dirName, saveSlots,
-      indexData, configData, deviceData,
-      configLoadState, deviceLoadState,
-      configLoadMessage, deviceLoadMessage,
-      indexFileName, configFileName, deviceFileName,
+      indexData, configData,
+      configLoadState,
+      configLoadMessage,
+      indexFileName, configFileName,
       pickDir, loadSlot, downloadSave,
-      loadIndexData, loadConfigData, loadDeviceData,
-      downloadConfig, downloadDevice,
+      loadIndexData, loadConfigData,
+      downloadConfig,
       getMonthText, hasData, resetDir
     } = useSaveData()
 
@@ -244,10 +243,6 @@ export default {
         if (configData.value || configLoadState.value === 'ready') return true
         return await loadConfigData()
       }
-      if (tab === 'device') {
-        if (deviceData.value || deviceLoadState.value === 'ready') return true
-        return await loadDeviceData()
-      }
       return true
     }
 
@@ -268,7 +263,6 @@ export default {
     const currentTabComponent = computed(() => {
       if (!hasData.value) return null
       if (renderedTab.value === 'config' && configLoadState.value !== 'ready') return null
-      if (renderedTab.value === 'device' && deviceLoadState.value !== 'ready') return null
       return {
         quick: QuickActions,
         basic: BasicEditor,
@@ -281,8 +275,7 @@ export default {
         battlearts: BattleArtsEditor,
         activity: ActivityEditor,
         curriculum: CurriculumEditor,
-        config: ConfigEditor,
-        device: DeviceEditor
+        config: ConfigEditor
       }[renderedTab.value] || null
     })
 
@@ -292,13 +285,6 @@ export default {
           title: '用户设置',
           state: configLoadState.value,
           message: configLoadMessage.value || '用户设置暂时不可用。'
-        }
-      }
-      if (renderedTab.value === 'device') {
-        return {
-          title: '设备设置',
-          state: deviceLoadState.value,
-          message: deviceLoadMessage.value || '设备设置暂时不可用。'
         }
       }
       return null
@@ -324,8 +310,7 @@ export default {
         battlearts: { artsList: saveData.value.battleArtsDataParamList },
         activity: { activityList: saveData.value.activityDataParamList },
         curriculum: { curriculumList: saveData.value.curriculumDataParamList },
-        config: configData.value ? { config: configData.value } : {},
-        device: deviceData.value ? { device: deviceData.value } : {}
+        config: configData.value ? { config: configData.value } : {}
       }[renderedTab.value] || {}
     })
 
@@ -430,9 +415,9 @@ export default {
       dirReady, dirName, saveSlots, slotPopoverShow, isSaving,
       showSaveModal, isTabSwitching, currentTabComponent, currentTabProps, currentTabListeners,
       currentSettingsStatus, showSettingsStatusView,
-      indexData, configData, deviceData,
-      configLoadState, deviceLoadState, configLoadMessage, deviceLoadMessage,
-      indexFileName, configFileName, deviceFileName,
+      indexData, configData,
+      configLoadState, configLoadMessage,
+      indexFileName, configFileName,
       handlePickDir, handleLoadSlot, openSaveModal, handleSave, handleBack,
       handleQuery, handleQuickAction, handleReset, formatSize, handleTabChange
     }

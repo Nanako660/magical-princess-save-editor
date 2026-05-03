@@ -5,8 +5,7 @@ export const SAVE_SLOT_TOTAL = 31
 export const FILE_NAMES = {
   INDEX: '/v10_indexdata.dat',
   USER_DATA: '/v10_userdata%N.dat',
-  CONFIG: '/v10_configdata.dat',
-  DEVICE: '/v10_devicedata.cfg'
+  CONFIG: '/v10_configdata.dat'
 }
 
 // 默认属性值

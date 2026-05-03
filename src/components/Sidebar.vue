@@ -3,7 +3,6 @@
     :value="activeTab"
     :options="menuOptions"
     @update:value="handleUpdateValue"
-    :disabled="!enabled"
   />
 </template>
 
@@ -33,11 +32,10 @@ export default {
   name: 'Sidebar',
   components: { NMenu },
   props: {
-    activeTab: { type: String, default: 'basic' },
-    enabled: { type: Boolean, default: true }
+    activeTab: { type: String, default: 'basic' }
   },
   emits: ['update:activeTab'],
-  setup(props, { emit }) {
+  setup(_, { emit }) {
     const menuOptions = [
       { key: 'quick', label: '首页', icon: renderIcon(HomeOutline) },
       { key: 'basic', label: '基础属性', icon: renderIcon(BarChartOutline) },
@@ -54,9 +52,7 @@ export default {
     ]
     
     const handleUpdateValue = (key) => {
-      if (props.enabled) {
-        emit('update:activeTab', key)
-      }
+      emit('update:activeTab', key)
     }
     
     return {

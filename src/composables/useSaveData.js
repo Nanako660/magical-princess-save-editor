@@ -46,6 +46,9 @@ export function useSaveData() {
       dirName.value = handle.name
       dirReady.value = true
       await refreshSlots()
+      if (configFileHandle && configLoadState.value !== 'ready') {
+        await loadConfigData()
+      }
     } catch {}
   }
 
@@ -69,6 +72,9 @@ export function useSaveData() {
       dirReady.value = true
       await saveDirHandle(handle)
       await refreshSlots()
+      if (configFileHandle && configLoadState.value !== 'ready') {
+        await loadConfigData()
+      }
       return true
     } catch (e) {
       if (e.name !== 'AbortError') {
@@ -392,9 +398,6 @@ export function useSaveData() {
     saveData.value = null
     fileName.value = ''
     error.value = null
-    configData.value = null
-    configLoadState.value = configFileHandle ? 'idle' : 'missing'
-    configLoadMessage.value = configFileHandle ? '' : '当前目录未找到用户设置文件 v10_configdata.dat'
   }
 
   const resetDir = async () => {

@@ -36,7 +36,7 @@
 
           <div v-if="dirReady" class="header-actions">
 
-            <n-button v-if="hasData" quaternary type="success" @click="openSaveModal">
+            <n-button v-if="showApplyButton" quaternary type="success" @click="openSaveModal">
               <template #icon><n-icon><SaveOutline /></n-icon></template>
               应用编辑
             </n-button>
@@ -64,22 +64,7 @@
         <SetupGuide :loading="isLoading" @pick-dir="handlePickDir" />
       </div>
 
-      <!-- 已配置目录但未加载存档：选择提示 -->
-      <n-layout v-else-if="!hasData" position="absolute" style="top: 72px; bottom: 0;">
-        <n-layout-content>
-          <div class="empty-state">
-            <n-empty description="从顶栏选择一个存档开始编辑">
-              <template #extra>
-                <n-text depth="3" style="font-size: 0.85rem;">
-                  点击上方「{{ dirName }}」按钮展开存档列表
-                </n-text>
-              </template>
-            </n-empty>
-          </div>
-        </n-layout-content>
-      </n-layout>
-
-      <!-- 已加载存档：编辑器 -->
+      <!-- 已配置目录：主界面 -->
       <template v-else>
         <n-layout has-sider position="absolute" style="top: 72px; bottom: 36px;">
           <n-layout-sider
@@ -89,7 +74,10 @@
             :width="180"
             class="app-sider"
           >
-            <Sidebar :active-tab="activeTab" :enabled="hasData" @update:active-tab="handleTabChange" />
+            <Sidebar
+              :active-tab="activeTab"
+              @update:active-tab="handleTabChange"
+            />
           </n-layout-sider>
 
           <n-layout-content
@@ -98,6 +86,17 @@
             content-style="min-height: 100%; box-sizing: border-box;"
           >
             <div class="content-shell" :class="{ 'content-shell--wide': isWideTab }">
+              <section v-if="showPreSaveEmptyState" class="editor-section">
+                <div class="empty-state empty-state--embedded">
+                  <n-empty description="从顶栏选择一个存档开始编辑">
+                    <template #extra>
+                      <n-text depth="3" style="font-size: 0.85rem;">
+                        点击上方「{{ dirName }}」按钮展开存档列表
+                      </n-text>
+                    </template>
+                  </n-empty>
+                </div>
+              </section>
               <transition name="tab-loading-fade">
                 <div v-if="isTabSwitching" class="tab-switch-overlay">
                   <div class="tab-switch-loader">
@@ -112,7 +111,7 @@
                 </div>
               </transition>
               <transition name="tab-content-fade" mode="out-in">
-                <section v-if="showSettingsStatusView" :key="`${renderedTab}-status`" class="editor-section settings-status-section">
+                <section v-if="!showPreSaveEmptyState && showSettingsStatusView" :key="`${renderedTab}-status`" class="editor-section settings-status-section">
                   <h2 class="section-title">{{ currentSettingsStatus.title }}</h2>
                   <n-card size="small" class="settings-status-card">
                     <n-alert
@@ -124,7 +123,7 @@
                     </n-alert>
                   </n-card>
                 </section>
-                <keep-alive v-else>
+                <keep-alive v-else-if="!showPreSaveEmptyState">
                   <component
                     :is="currentTabComponent"
                     v-if="currentTabComponent"
@@ -149,7 +148,7 @@
       title="确认应用编辑"
       :loading="isSaving"
     >
-      <p style="color: #ccc;">确定要将当前修改应用到 <strong>{{ fileName }}</strong> 吗？</p>
+      <p style="color: #ccc;">{{ saveModalText }}</p>
       <template #action>
         <n-button type="primary" :loading="isSaving" @click="handleSave">应用</n-button>
         <n-button @click="showSaveModal = false">取消</n-button>
@@ -247,7 +246,7 @@ export default {
     }
 
     const handleTabChange = async (tab) => {
-      if (!hasData.value || tab === activeTab.value) return
+      if (tab === activeTab.value) return
       activeTab.value = tab
       clearPendingTabSwitch()
       isTabSwitching.value = true
@@ -261,7 +260,7 @@ export default {
     }
 
     const currentTabComponent = computed(() => {
-      if (!hasData.value) return null
+      if (!hasData.value && renderedTab.value !== 'config') return null
       if (renderedTab.value === 'config' && configLoadState.value !== 'ready') return null
       return {
         quick: QuickActions,
@@ -297,6 +296,9 @@ export default {
     ))
 
     const currentTabProps = computed(() => {
+      if (renderedTab.value === 'config') {
+        return configData.value ? { config: configData.value } : {}
+      }
       if (!saveData.value) return {}
       return {
         quick: {},
@@ -309,8 +311,7 @@ export default {
         global: { gstatus: saveData.value.gstatus },
         battlearts: { artsList: saveData.value.battleArtsDataParamList },
         activity: { activityList: saveData.value.activityDataParamList },
-        curriculum: { curriculumList: saveData.value.curriculumDataParamList },
-        config: configData.value ? { config: configData.value } : {}
+        curriculum: { curriculumList: saveData.value.curriculumDataParamList }
       }[renderedTab.value] || {}
     })
 
@@ -349,6 +350,14 @@ export default {
 
     const appVersion = __APP_VERSION__
     const isWideTab = computed(() => wideTabs.has(activeTab.value))
+    const showPreSaveEmptyState = computed(() => dirReady.value && !hasData.value && activeTab.value !== 'config')
+    const showApplyButton = computed(() => dirReady.value && (hasData.value || configLoadState.value === 'ready'))
+    const saveModalText = computed(() => {
+      if (hasData.value && fileName.value) {
+        return `确定要将当前修改应用到 ${fileName.value}，并同步保存用户设置吗？`
+      }
+      return '确定要应用当前用户设置修改吗？'
+    })
 
     const handlePickDir = async () => {
       const ok = await pickDir()
@@ -359,8 +368,10 @@ export default {
       slotPopoverShow.value = false
       await loadSlot(slot)
       if (!error.value && hasData.value) {
-        activeTab.value = 'quick'
-        renderedTab.value = 'quick'
+        if (activeTab.value !== 'config') {
+          activeTab.value = 'quick'
+          renderedTab.value = 'quick'
+        }
         isTabSwitching.value = false
         message.success(`已加载 ${slot.name}`)
       } else if (error.value) {
@@ -369,18 +380,29 @@ export default {
     }
 
     const openSaveModal = () => {
+      if (!showApplyButton.value) return
       showSaveModal.value = true
     }
 
     const handleSave = async () => {
       isSaving.value = true
-      const ok = await downloadSave()
+      let saveOk = true
+      let configOk = true
+
+      if (hasData.value) {
+        saveOk = await downloadSave()
+      }
+
+      if (configLoadState.value === 'ready' && configData.value) {
+        configOk = await downloadConfig()
+      }
+
       isSaving.value = false
-      if (ok) {
+      if (saveOk && configOk) {
         showSaveModal.value = false
-        message.success('存档已保存')
+        message.success(hasData.value ? '修改已应用' : '用户设置已保存')
       } else {
-        message.error(error.value || '保存失败')
+        message.error(error.value || '应用失败')
       }
     }
 
@@ -413,6 +435,7 @@ export default {
       darkTheme, logoSrc, appVersion,
       saveData, isLoading, fileName, activeTab, renderedTab, hasData, footerText, isWideTab,
       dirReady, dirName, saveSlots, slotPopoverShow, isSaving,
+      showPreSaveEmptyState, showApplyButton, saveModalText,
       showSaveModal, isTabSwitching, currentTabComponent, currentTabProps, currentTabListeners,
       currentSettingsStatus, showSettingsStatusView,
       indexData, configData,
@@ -838,6 +861,10 @@ html, body, #app {
   justify-content: center;
   align-items: center;
   height: calc(100vh - 72px);
+}
+
+.empty-state--embedded {
+  min-height: calc(100vh - 72px - 36px - 48px);
 }
 .setup-wrapper {
   position: absolute;

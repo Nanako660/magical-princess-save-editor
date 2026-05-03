@@ -15,7 +15,7 @@ save-editor/
 │   │   ├── BattleArtsEditor.vue # 战斗技能编辑
 │   │   ├── ActivityEditor.vue   # 活动数据编辑
 │   │   ├── CurriculumEditor.vue # 课程数据编辑
-│   │   ├── ConfigEditor.vue     # 用户设置编辑
+│   │   ├── ConfigEditor.vue     # 游戏设置编辑
 │   │   ├── ItemEditor.vue       # 物品列表编辑
 │   │   ├── SkillEditor.vue      # 技能列表编辑
 │   │   ├── GlobalEditor.vue     # 跨轮回数据编辑
@@ -121,7 +121,7 @@ npm run build
 - 活动次数、完成次数与等级编辑
 - 课程启用、完成和耐久编辑
 
-### 用户设置
+### 游戏设置
 - 语言、背景乐音量、音效音量、语音音量
 - 文本显示速度与直播模式
 - 目录初始化后自动预加载，统一通过“应用编辑”保存
@@ -183,7 +183,7 @@ npm run build
 
 文件格式：
 - `v10_userdata1.dat` ~ `v10_userdata31.dat` (用户存档)
-- `v10_configdata.dat` (用户设置)
+- `v10_configdata.dat` (游戏设置)
 
 ## 技术栈
 

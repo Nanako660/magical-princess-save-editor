@@ -66,6 +66,16 @@
 
       <!-- 已配置目录：主界面 -->
       <template v-else>
+        <transition name="pending-toast-slide">
+          <div v-if="showUndoToast" class="undo-toast">
+            <n-alert type="error" class="undo-toast__alert">
+              <div class="undo-toast__body">
+                <span class="undo-toast__label">有更改未保存</span>
+                <n-button type="error" ghost size="small" @click="handleUndoLastChange">撤销更改</n-button>
+              </div>
+            </n-alert>
+          </div>
+        </transition>
         <n-layout has-sider position="absolute" style="top: 72px; bottom: 36px;">
           <n-layout-sider
             bordered
@@ -158,7 +168,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import {
   NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
   NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal, NSkeleton, NCard, NAlert,
@@ -221,8 +231,51 @@ export default {
     const isSaving = ref(false)
     const slotPopoverShow = ref(false)
     const showSaveModal = ref(false)
+    const saveBaselineSnapshot = ref(null)
+    const configBaselineSnapshot = ref(null)
+    const saveBaselineSerialized = ref('')
+    const configBaselineSerialized = ref('')
     const wideTabs = new Set(['items', 'skills', 'battlearts', 'activity', 'curriculum'])
     let switchFrameId = null
+    let suppressSaveTracking = false
+    let suppressConfigTracking = false
+
+    const stableSerialize = (value) => {
+      if (value === null || value === undefined) return ''
+      return JSON.stringify(value)
+    }
+
+    const cloneValue = (value) => {
+      if (value === null || value === undefined) return null
+      return JSON.parse(JSON.stringify(value))
+    }
+
+    const setSaveBaseline = (snapshot = saveData.value) => {
+      const cloned = cloneValue(snapshot)
+      saveBaselineSnapshot.value = cloned
+      saveBaselineSerialized.value = stableSerialize(cloned)
+    }
+
+    const setConfigBaseline = (snapshot = configData.value) => {
+      const cloned = cloneValue(snapshot)
+      configBaselineSnapshot.value = cloned
+      configBaselineSerialized.value = stableSerialize(cloned)
+    }
+
+    const clearSaveTrackingState = () => {
+      saveBaselineSnapshot.value = null
+      saveBaselineSerialized.value = ''
+    }
+
+    const clearConfigTrackingState = () => {
+      configBaselineSnapshot.value = null
+      configBaselineSerialized.value = ''
+    }
+
+    const clearAllTrackingState = () => {
+      clearSaveTrackingState()
+      clearConfigTrackingState()
+    }
 
     const clearPendingTabSwitch = () => {
       if (switchFrameId !== null) {
@@ -239,7 +292,11 @@ export default {
     const ensureTabDataLoaded = async (tab) => {
       if (tab === 'config') {
         if (configData.value || configLoadState.value === 'ready') return true
-        return await loadConfigData()
+        const ok = await loadConfigData()
+        if (ok && configData.value) {
+          setConfigBaseline()
+        }
+        return ok
       }
       return true
     }
@@ -280,9 +337,9 @@ export default {
     const currentSettingsStatus = computed(() => {
       if (renderedTab.value === 'config') {
         return {
-          title: '用户设置',
+          title: '游戏设置',
           state: configLoadState.value,
-          message: configLoadMessage.value || '用户设置暂时不可用。'
+          message: configLoadMessage.value || '游戏设置暂时不可用。'
         }
       }
       return null
@@ -353,22 +410,42 @@ export default {
     const isWideTab = computed(() => wideTabs.has(activeTab.value))
     const showPreSaveEmptyState = computed(() => dirReady.value && !hasData.value && !['quick', 'config'].includes(activeTab.value))
     const showApplyButton = computed(() => dirReady.value && (hasData.value || configLoadState.value === 'ready'))
+    const isSaveDirty = computed(() => !!saveBaselineSerialized.value && stableSerialize(saveData.value) !== saveBaselineSerialized.value)
+    const isConfigDirty = computed(() => !!configBaselineSerialized.value && stableSerialize(configData.value) !== configBaselineSerialized.value)
+    const hasPendingChanges = computed(() => isSaveDirty.value || isConfigDirty.value)
+    const showUndoToast = computed(() => hasPendingChanges.value)
     const saveModalText = computed(() => {
-      if (hasData.value && fileName.value) {
-        return `确定要将当前修改应用到 ${fileName.value}，并同步保存用户设置吗？`
+      if (isSaveDirty.value && isConfigDirty.value && fileName.value) {
+        return `确定要将当前修改应用到 ${fileName.value}，并同步保存游戏设置吗？`
       }
-      return '确定要应用当前用户设置修改吗？'
+      if (isSaveDirty.value && fileName.value) {
+        return `确定要将当前修改应用到 ${fileName.value} 吗？`
+      }
+      return '确定要应用当前游戏设置修改吗？'
     })
 
     const handlePickDir = async () => {
+      suppressSaveTracking = true
+      suppressConfigTracking = true
       const ok = await pickDir()
-      if (ok) message.success('存档目录已设置')
+      suppressSaveTracking = false
+      suppressConfigTracking = false
+      if (ok) {
+        clearAllTrackingState()
+        if (configData.value && configLoadState.value === 'ready') {
+          setConfigBaseline()
+        }
+        message.success('存档目录已设置')
+      }
     }
 
     const handleLoadSlot = async (slot) => {
       slotPopoverShow.value = false
+      suppressSaveTracking = true
       await loadSlot(slot)
+      suppressSaveTracking = false
       if (!error.value && hasData.value) {
+        setSaveBaseline()
         if (activeTab.value !== 'config') {
           activeTab.value = 'quick'
           renderedTab.value = 'quick'
@@ -376,32 +453,52 @@ export default {
         isTabSwitching.value = false
         message.success(`已加载 ${slot.name}`)
       } else if (error.value) {
+        clearSaveTrackingState()
         message.error(`加载失败: ${error.value}`)
       }
     }
 
     const openSaveModal = () => {
       if (!showApplyButton.value) return
+      if (!hasPendingChanges.value) {
+        message.info('未进行编辑')
+        return
+      }
       showSaveModal.value = true
     }
 
     const handleSave = async () => {
+      if (!hasPendingChanges.value) {
+        showSaveModal.value = false
+        message.info('未进行编辑')
+        return
+      }
       isSaving.value = true
+      const shouldSaveData = isSaveDirty.value && hasData.value
+      const shouldSaveConfig = isConfigDirty.value && configLoadState.value === 'ready' && configData.value
       let saveOk = true
       let configOk = true
 
-      if (hasData.value) {
+      if (shouldSaveData) {
         saveOk = await downloadSave()
       }
 
-      if (configLoadState.value === 'ready' && configData.value) {
+      if (shouldSaveConfig) {
         configOk = await downloadConfig()
       }
 
       isSaving.value = false
       if (saveOk && configOk) {
+        if (shouldSaveData) setSaveBaseline()
+        if (shouldSaveConfig) setConfigBaseline()
         showSaveModal.value = false
-        message.success(hasData.value ? '修改已应用' : '用户设置已保存')
+        if (shouldSaveData && shouldSaveConfig) {
+          message.success('修改已应用')
+        } else if (shouldSaveData) {
+          message.success('存档修改已应用')
+        } else {
+          message.success('游戏设置已保存')
+        }
       } else {
         message.error(error.value || '应用失败')
       }
@@ -413,19 +510,53 @@ export default {
     }
 
     const handleQuickAction = (action) => {
+      if (!saveData.value) return
+      suppressSaveTracking = true
       const result = executeAction(action)
-      if (result) message.success(result.message)
+      suppressSaveTracking = false
+      if (!result) return
+      message.success(result.message)
+    }
+
+    const handleUndoLastChange = () => {
+      if (!hasPendingChanges.value) return
+      if (isSaveDirty.value && saveBaselineSnapshot.value) {
+        suppressSaveTracking = true
+        saveData.value = cloneValue(saveBaselineSnapshot.value)
+        suppressSaveTracking = false
+      }
+      if (isConfigDirty.value && configBaselineSnapshot.value) {
+        suppressConfigTracking = true
+        configData.value = cloneValue(configBaselineSnapshot.value)
+        suppressConfigTracking = false
+      }
+      message.success('已撤销未保存更改')
     }
 
     const handleReset = async () => {
       await resetDir()
+      clearAllTrackingState()
       message.success('目录配置已重置')
     }
+
+    watch(
+      () => [configLoadState.value, stableSerialize(configData.value)],
+      ([state, serialized]) => {
+        if (state === 'ready' && serialized && !configBaselineSerialized.value) {
+          setConfigBaseline(configData.value)
+        }
+      },
+      { immediate: true }
+    )
 
     const formatSize = (bytes) => {
       if (bytes < 1024) return bytes + ' B'
       return (bytes / 1024).toFixed(1) + ' KB'
     }
+
+    onBeforeUnmount(() => {
+      clearPendingTabSwitch()
+    })
 
     return {
       darkTheme, logoSrc, appVersion,
@@ -434,10 +565,11 @@ export default {
       showPreSaveEmptyState, showApplyButton, saveModalText,
       showSaveModal, isTabSwitching, currentTabComponent, currentTabProps, currentTabListeners,
       currentSettingsStatus, showSettingsStatusView,
+      isSaveDirty, isConfigDirty, hasPendingChanges, showUndoToast,
       configData,
       configLoadState, configLoadMessage,
       handlePickDir, handleLoadSlot, openSaveModal, handleSave,
-      handleQuery, handleQuickAction, handleReset, formatSize, handleTabChange
+      handleQuery, handleQuickAction, handleUndoLastChange, handleReset, formatSize, handleTabChange
     }
   }
 }
@@ -497,6 +629,75 @@ html, body, #app {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.undo-toast {
+  position: fixed;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  width: min(280px, calc(100vw - 24px));
+}
+
+.undo-toast__alert {
+  border: 1px solid rgba(239, 68, 68, 0.42);
+  background: rgba(127, 29, 29, 0.94) !important;
+}
+
+.undo-toast__alert :deep(.n-alert-body__content),
+.undo-toast__alert :deep(.n-alert__icon) {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.undo-toast__alert :deep(.n-alert-body) {
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+}
+
+.undo-toast__body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.undo-toast__label {
+  font-size: 0.84rem;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.86);
+  white-space: nowrap;
+}
+
+.undo-toast__alert :deep(.n-button) {
+  --n-height: 24px !important;
+  --n-padding: 0 8px !important;
+  --n-font-size: 12px !important;
+  --n-border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  --n-border-hover: 1px solid rgba(255, 255, 255, 0.28) !important;
+  --n-text-color: rgba(255, 255, 255, 0.88) !important;
+  --n-text-color-hover: #fff !important;
+}
+
+.undo-toast__alert :deep(.n-alert__icon) {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0 !important;
+}
+
+.undo-toast__alert :deep(.n-alert__icon .n-base-icon) {
+  align-items: center;
+  justify-content: center;
+}
+
+.undo-toast__alert :deep(.n-alert__icon svg) {
+  display: block;
 }
 
 .app-content {
@@ -731,6 +932,23 @@ html, body, #app {
 .tab-content-fade-enter-active,
 .tab-content-fade-leave-active {
   transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.pending-toast-slide-enter-active,
+.pending-toast-slide-leave-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.pending-toast-slide-enter-from,
+.pending-toast-slide-leave-to {
+  opacity: 0;
+  transform: translate(-50%, 18px);
+}
+
+.pending-toast-slide-enter-to,
+.pending-toast-slide-leave-from {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .tab-loading-fade-enter-from,

@@ -74,7 +74,7 @@ export default {
         key: 'group-other',
         children: [
           { key: 'global', label: '轮回数据', icon: renderIcon(SyncOutline) },
-          { key: 'config', label: '用户设置', icon: renderIcon(SettingsOutline) }
+          { key: 'config', label: '游戏设置', icon: renderIcon(SettingsOutline) }
         ]
       }
     ]

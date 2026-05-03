@@ -1,6 +1,6 @@
 <template>
   <section class="editor-section">
-    <h2 class="section-title">用户设置</h2>
+    <h2 class="section-title">游戏设置</h2>
     
     <div class="card-grid">
       <div class="card-grid-item card-grid-item--full">

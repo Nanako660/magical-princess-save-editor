@@ -141,7 +141,7 @@ export function useSaveData() {
     if (!configFileHandle) {
       configData.value = null
       configLoadState.value = 'missing'
-      configLoadMessage.value = '当前目录未找到用户设置文件 v10_configdata.dat'
+      configLoadMessage.value = '当前目录未找到游戏设置文件 v10_configdata.dat'
     } else if (configLoadState.value !== 'ready') {
       configLoadState.value = 'idle'
       configLoadMessage.value = ''
@@ -172,7 +172,7 @@ export function useSaveData() {
       if (!configFileHandle) {
         configData.value = null
         configLoadState.value = 'missing'
-        configLoadMessage.value = '当前目录未找到用户设置文件 v10_configdata.dat'
+        configLoadMessage.value = '当前目录未找到游戏设置文件 v10_configdata.dat'
         return false
       }
     }

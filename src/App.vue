@@ -42,6 +42,9 @@
             </n-button>
 
             <n-popconfirm 
+              class="header-reset-popconfirm"
+              positive-text="确认"
+              negative-text="取消"
               @positive-click="handleReset"
             >
               <template #trigger>
@@ -51,10 +54,6 @@
                 </n-button>
               </template>
               确定重置目录配置？将清除已保存的存档目录。
-              <template #action="{ handlePositiveClick, handleNegativeClick }">
-                <n-button size="small" type="error" @click="handlePositiveClick">确认</n-button>
-                <n-button size="small" @click="handleNegativeClick">取消</n-button>
-              </template>
             </n-popconfirm>
           </div>
         </div>
@@ -113,7 +112,19 @@
                 </div>
               </transition>
               <transition name="tab-content-fade" mode="out-in">
-                <keep-alive>
+                <section v-if="showSettingsStatusView" :key="`${renderedTab}-status`" class="editor-section settings-status-section">
+                  <h2 class="section-title">{{ currentSettingsStatus.title }}</h2>
+                  <n-card size="small" class="settings-status-card">
+                    <n-alert
+                      :type="currentSettingsStatus.state === 'missing' ? 'warning' : 'error'"
+                      :title="currentSettingsStatus.state === 'missing' ? '未找到设置文件' : '设置文件加载失败'"
+                      class="settings-status-alert"
+                    >
+                      {{ currentSettingsStatus.message }}
+                    </n-alert>
+                  </n-card>
+                </section>
+                <keep-alive v-else>
                   <component
                     :is="currentTabComponent"
                     v-if="currentTabComponent"
@@ -151,7 +162,7 @@
 import { ref, computed } from 'vue'
 import {
   NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
-  NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal, NSkeleton,
+  NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal, NSkeleton, NCard, NAlert,
   darkTheme, createDiscreteApi
 } from 'naive-ui'
 import { FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline } from '@vicons/ionicons5'
@@ -180,7 +191,7 @@ export default {
 
   components: {
     NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
-    NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal, NSkeleton,
+    NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal, NSkeleton, NCard, NAlert,
     FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline,
     SetupGuide, Sidebar, BasicEditor, DetailedEditor, EquipmentEditor,
     FriendEditor, ItemEditor, SkillEditor, GlobalEditor, QuickActions,
@@ -196,6 +207,8 @@ export default {
       saveData, isLoading, fileName, error,
       dirReady, dirName, saveSlots,
       indexData, configData, deviceData,
+      configLoadState, deviceLoadState,
+      configLoadMessage, deviceLoadMessage,
       indexFileName, configFileName, deviceFileName,
       pickDir, loadSlot, downloadSave,
       loadIndexData, loadConfigData, loadDeviceData,
@@ -226,11 +239,24 @@ export default {
       isTabSwitching.value = false
     }
 
-    const handleTabChange = (tab) => {
+    const ensureTabDataLoaded = async (tab) => {
+      if (tab === 'config') {
+        if (configData.value || configLoadState.value === 'ready') return true
+        return await loadConfigData()
+      }
+      if (tab === 'device') {
+        if (deviceData.value || deviceLoadState.value === 'ready') return true
+        return await loadDeviceData()
+      }
+      return true
+    }
+
+    const handleTabChange = async (tab) => {
       if (!hasData.value || tab === activeTab.value) return
       activeTab.value = tab
       clearPendingTabSwitch()
       isTabSwitching.value = true
+      await ensureTabDataLoaded(tab)
       switchFrameId = requestAnimationFrame(() => {
         switchFrameId = requestAnimationFrame(() => {
           completeTabSwitch(tab)
@@ -241,8 +267,8 @@ export default {
 
     const currentTabComponent = computed(() => {
       if (!hasData.value) return null
-      if (renderedTab.value === 'config' && !configData.value) return null
-      if (renderedTab.value === 'device' && !deviceData.value) return null
+      if (renderedTab.value === 'config' && configLoadState.value !== 'ready') return null
+      if (renderedTab.value === 'device' && deviceLoadState.value !== 'ready') return null
       return {
         quick: QuickActions,
         basic: BasicEditor,
@@ -259,6 +285,30 @@ export default {
         device: DeviceEditor
       }[renderedTab.value] || null
     })
+
+    const currentSettingsStatus = computed(() => {
+      if (renderedTab.value === 'config') {
+        return {
+          title: '用户设置',
+          state: configLoadState.value,
+          message: configLoadMessage.value || '用户设置暂时不可用。'
+        }
+      }
+      if (renderedTab.value === 'device') {
+        return {
+          title: '设备设置',
+          state: deviceLoadState.value,
+          message: deviceLoadMessage.value || '设备设置暂时不可用。'
+        }
+      }
+      return null
+    })
+
+    const showSettingsStatusView = computed(() => (
+      !!currentSettingsStatus.value
+      && currentSettingsStatus.value.state !== 'ready'
+      && !isTabSwitching.value
+    ))
 
     const currentTabProps = computed(() => {
       if (!saveData.value) return {}
@@ -379,7 +429,9 @@ export default {
       saveData, isLoading, fileName, activeTab, renderedTab, hasData, footerText, isWideTab,
       dirReady, dirName, saveSlots, slotPopoverShow, isSaving,
       showSaveModal, isTabSwitching, currentTabComponent, currentTabProps, currentTabListeners,
+      currentSettingsStatus, showSettingsStatusView,
       indexData, configData, deviceData,
+      configLoadState, deviceLoadState, configLoadMessage, deviceLoadMessage,
       indexFileName, configFileName, deviceFileName,
       handlePickDir, handleLoadSlot, openSaveModal, handleSave, handleBack,
       handleQuery, handleQuickAction, handleReset, formatSize, handleTabChange
@@ -650,6 +702,25 @@ html, body, #app {
 
 .tab-switch-loader__skeleton {
   opacity: 0.82;
+}
+
+.settings-status-card {
+  max-width: 760px;
+}
+
+.settings-status-alert {
+  width: 100%;
+}
+
+.header-reset-popconfirm .n-popconfirm__action {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.header-reset-popconfirm .n-popconfirm__action .n-button {
+  margin: 0;
 }
 
 .tab-loading-fade-enter-active,

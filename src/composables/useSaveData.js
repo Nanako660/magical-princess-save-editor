@@ -10,10 +10,10 @@ import { saveDirHandle, loadDirHandle, verifyPermission, clearDir } from '../uti
 
 const hasFSA = typeof window.showOpenFilePicker === 'function'
 
-const SAVE_PATTERN = /^v10_userdata(\d+)\.dat$/
-const INDEX_PATTERN = /^v10_indexdata\.dat$/
-const CONFIG_PATTERN = /^v10_configdata\.dat$/
-const DEVICE_PATTERN = /^v10_devicedata\.cfg$/
+const SAVE_PATTERN = /^v10_userdata(\d+)\.dat$/i
+const INDEX_PATTERN = /^v10_indexdata\.dat$/i
+const CONFIG_PATTERN = /^v10_configdata\.dat$/i
+const DEVICE_PATTERN = /^v10_devicedata\.(cfg|dat)$/i
 
 export function useSaveData() {
   const saveData = ref(null)
@@ -29,6 +29,10 @@ export function useSaveData() {
   const indexData = ref(null)
   const configData = ref(null)
   const deviceData = ref(null)
+  const configLoadState = ref('idle')
+  const deviceLoadState = ref('idle')
+  const configLoadMessage = ref('')
+  const deviceLoadMessage = ref('')
   const indexFileName = ref('')
   const configFileName = ref('')
   const deviceFileName = ref('')
@@ -93,6 +97,9 @@ export function useSaveData() {
     indexFileHandle = null
     configFileHandle = null
     deviceFileHandle = null
+    indexFileName.value = ''
+    configFileName.value = ''
+    deviceFileName.value = ''
     try {
       for await (const [name, fh] of dirHandle) {
         // 存档文件
@@ -131,6 +138,22 @@ export function useSaveData() {
       console.log('refreshSlots: found', slots.length, 'saves, index:', !!indexFileHandle, 'config:', !!configFileHandle, 'device:', !!deviceFileHandle)
     } catch (e) {
       console.error('refreshSlots error:', e)
+    }
+    if (!configFileHandle) {
+      configData.value = null
+      configLoadState.value = 'missing'
+      configLoadMessage.value = '当前目录未找到用户设置文件 v10_configdata.dat'
+    } else if (configLoadState.value !== 'ready') {
+      configLoadState.value = 'idle'
+      configLoadMessage.value = ''
+    }
+    if (!deviceFileHandle) {
+      deviceData.value = null
+      deviceLoadState.value = 'missing'
+      deviceLoadMessage.value = '当前目录未找到设备设置文件 v10_devicedata.cfg 或 v10_devicedata.dat'
+    } else if (deviceLoadState.value !== 'ready') {
+      deviceLoadState.value = 'idle'
+      deviceLoadMessage.value = ''
     }
     saveSlots.value = slots
   }
@@ -177,17 +200,27 @@ export function useSaveData() {
   async function loadConfigData() {
     if (!configFileHandle) {
       console.log('loadConfigData: no config file')
+      configData.value = null
+      configLoadState.value = 'missing'
+      configLoadMessage.value = '当前目录未找到用户设置文件 v10_configdata.dat'
       return false
     }
     isLoading.value = true
+    configLoadState.value = 'loading'
+    configLoadMessage.value = ''
     try {
       const file = await configFileHandle.getFile()
       const content = await file.text()
       configData.value = parseConfigFile(content)
+      configLoadState.value = 'ready'
+      configLoadMessage.value = ''
       console.log('loadConfigData: loaded')
       return true
     } catch (e) {
       error.value = '设置加载失败：' + e.message
+      configData.value = null
+      configLoadState.value = 'error'
+      configLoadMessage.value = error.value
       console.error('loadConfigData error:', e)
       return false
     } finally {
@@ -199,17 +232,27 @@ export function useSaveData() {
   async function loadDeviceData() {
     if (!deviceFileHandle) {
       console.log('loadDeviceData: no device file')
+      deviceData.value = null
+      deviceLoadState.value = 'missing'
+      deviceLoadMessage.value = '当前目录未找到设备设置文件 v10_devicedata.cfg 或 v10_devicedata.dat'
       return false
     }
     isLoading.value = true
+    deviceLoadState.value = 'loading'
+    deviceLoadMessage.value = ''
     try {
       const file = await deviceFileHandle.getFile()
       const content = await file.text()
       deviceData.value = parseDeviceFile(content)
+      deviceLoadState.value = 'ready'
+      deviceLoadMessage.value = ''
       console.log('loadDeviceData: loaded')
       return true
     } catch (e) {
       error.value = '设备设置加载失败：' + e.message
+      deviceData.value = null
+      deviceLoadState.value = 'error'
+      deviceLoadMessage.value = error.value
       console.error('loadDeviceData error:', e)
       return false
     } finally {
@@ -410,6 +453,12 @@ export function useSaveData() {
     saveData.value = null
     fileName.value = ''
     error.value = null
+    configData.value = null
+    deviceData.value = null
+    configLoadState.value = configFileHandle ? 'idle' : 'missing'
+    deviceLoadState.value = deviceFileHandle ? 'idle' : 'missing'
+    configLoadMessage.value = configFileHandle ? '' : '当前目录未找到用户设置文件 v10_configdata.dat'
+    deviceLoadMessage.value = deviceFileHandle ? '' : '当前目录未找到设备设置文件 v10_devicedata.cfg 或 v10_devicedata.dat'
   }
 
   const resetDir = async () => {
@@ -426,6 +475,10 @@ export function useSaveData() {
     indexData.value = null
     configData.value = null
     deviceData.value = null
+    configLoadState.value = 'idle'
+    deviceLoadState.value = 'idle'
+    configLoadMessage.value = ''
+    deviceLoadMessage.value = ''
     indexFileName.value = ''
     configFileName.value = ''
     deviceFileName.value = ''
@@ -438,6 +491,8 @@ export function useSaveData() {
     saveData, isLoading, fileName, error,
     dirReady, dirName, saveSlots,
     indexData, configData, deviceData,
+    configLoadState, deviceLoadState,
+    configLoadMessage, deviceLoadMessage,
     indexFileName, configFileName, deviceFileName,
     importSave, pickAndImportSave,
     pickDir, loadSlot, refreshSlots,

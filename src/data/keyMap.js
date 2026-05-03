@@ -301,35 +301,6 @@ export const ConfigKeyMap = {
   fi: 'flagItemGettedGlobal'
 }
 
-// SaveDataUserDevice字段键名映射
-export const DeviceKeyMap = {
-  fs: 'isFullScreen',
-  re: 'resolutionListId',
-  qlt: 'qualityListType'
-}
-
-// SaveDataIndexParams字段键名映射
-export const IndexParamsKeyMap = {
-  ip: 'isPlaying',
-  in: 'isNextLoopStart',
-  id: 'saveSlotId',
-  lo: 'loopCount',
-  pd: 'period',
-  pn: 'playerName',
-  dt: 'date',
-  lp: 'levelPhysical',
-  li: 'levelIntelligence',
-  lc: 'levelCharm',
-  ls: 'levelSense',
-  lb: 'levelBattle',
-  la: 'levelArts',
-  lm: 'levelMagic',
-  ac: 'acClass',
-  cv: 'charaFav',
-  lt: 'location',
-  st: 'situation'
-}
-
 // 反向映射
 export const BattleArtsKeyMapReverse = Object.fromEntries(
   Object.entries(BattleArtsKeyMap).map(([k, v]) => [v, k])
@@ -345,12 +316,4 @@ export const CurriculumKeyMapReverse = Object.fromEntries(
 
 export const ConfigKeyMapReverse = Object.fromEntries(
   Object.entries(ConfigKeyMap).map(([k, v]) => [v, k])
-)
-
-export const DeviceKeyMapReverse = Object.fromEntries(
-  Object.entries(DeviceKeyMap).map(([k, v]) => [v, k])
-)
-
-export const IndexParamsKeyMapReverse = Object.fromEntries(
-  Object.entries(IndexParamsKeyMap).map(([k, v]) => [v, k])
 )

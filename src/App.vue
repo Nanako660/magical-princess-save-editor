@@ -164,7 +164,7 @@ import {
   NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal, NSkeleton, NCard, NAlert,
   darkTheme, createDiscreteApi
 } from 'naive-ui'
-import { FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline } from '@vicons/ionicons5'
+import { FolderOpenOutline, SaveOutline, RefreshOutline } from '@vicons/ionicons5'
 import { useSaveData } from './composables/useSaveData.js'
 import { useQuickActions } from './composables/useQuickActions.js'
 import logoSrc from './assets/logo.png'
@@ -190,7 +190,7 @@ export default {
   components: {
     NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
     NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal, NSkeleton, NCard, NAlert,
-    FolderOpenOutline, SaveOutline, ArrowBackOutline, RefreshOutline,
+    FolderOpenOutline, SaveOutline, RefreshOutline,
     SetupGuide, Sidebar, BasicEditor, DetailedEditor, EquipmentEditor,
     FriendEditor, ItemEditor, SkillEditor, GlobalEditor, QuickActions,
     ConfigEditor, BattleArtsEditor, ActivityEditor, CurriculumEditor
@@ -204,12 +204,11 @@ export default {
     const {
       saveData, isLoading, fileName, error,
       dirReady, dirName, saveSlots,
-      indexData, configData,
+      configData,
       configLoadState,
       configLoadMessage,
-      indexFileName, configFileName,
       pickDir, loadSlot, downloadSave,
-      loadIndexData, loadConfigData,
+      loadConfigData,
       downloadConfig,
       getMonthText, hasData, resetDir
     } = useSaveData()
@@ -408,11 +407,6 @@ export default {
       }
     }
 
-    const handleBack = () => {
-      saveData.value = null
-      fileName.value = ''
-    }
-
     const handleQuery = (action, cb) => {
       const info = getActionInfo(action)
       if (info) cb(info)
@@ -440,10 +434,9 @@ export default {
       showPreSaveEmptyState, showApplyButton, saveModalText,
       showSaveModal, isTabSwitching, currentTabComponent, currentTabProps, currentTabListeners,
       currentSettingsStatus, showSettingsStatusView,
-      indexData, configData,
+      configData,
       configLoadState, configLoadMessage,
-      indexFileName, configFileName,
-      handlePickDir, handleLoadSlot, openSaveModal, handleSave, handleBack,
+      handlePickDir, handleLoadSlot, openSaveModal, handleSave,
       handleQuery, handleQuickAction, handleReset, formatSize, handleTabChange
     }
   }

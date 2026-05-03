@@ -12,6 +12,10 @@ save-editor/
 │   │   ├── DetailedEditor.vue   # 详细属性编辑
 │   │   ├── EquipmentEditor.vue  # 装备编辑
 │   │   ├── FriendEditor.vue     # NPC好感度编辑
+│   │   ├── BattleArtsEditor.vue # 战斗技能编辑
+│   │   ├── ActivityEditor.vue   # 活动数据编辑
+│   │   ├── CurriculumEditor.vue # 课程数据编辑
+│   │   ├── ConfigEditor.vue     # 用户设置编辑
 │   │   ├── ItemEditor.vue       # 物品列表编辑
 │   │   ├── SkillEditor.vue      # 技能列表编辑
 │   │   ├── GlobalEditor.vue     # 跨轮回数据编辑
@@ -20,8 +24,10 @@ save-editor/
 │   │   └── Sidebar.vue          # 导航侧边栏
 │   ├── composables/             # 业务逻辑
 │   │   ├── useCrypto.js         # AES加解密
+│   │   ├── useDeferredTableRender.js # 列表延迟挂载
 │   │   ├── useSaveData.js       # 存档数据管理
-│   │   └── useQuickActions.js   # 快捷操作逻辑
+│   │   ├── useQuickActions.js   # 快捷操作逻辑
+│   │   └── useViewportTableHeight.js # 列表高度计算
 │   ├── data/                    # 静态数据
 │   │   ├── constants.js         # 常量定义
 │   │   ├── enums.js             # 枚举映射
@@ -103,12 +109,22 @@ npm run build
 ### 物品编辑
 - 物品列表管理
 - 142种物品中文名称
-- 添加/删除物品
+- 分组表格直接编辑数量、使用次数与合成状态
 
 ### 技能编辑
 - 技能列表管理
 - 100+技能中文名称
 - 解锁/学习状态
+
+### 战斗技能 / 活动 / 课程编辑
+- 战斗技能学习状态编辑
+- 活动次数、完成次数与等级编辑
+- 课程启用、完成和耐久编辑
+
+### 用户设置
+- 语言、背景乐音量、音效音量、语音音量
+- 文本显示速度与直播模式
+- 目录初始化后自动预加载，统一通过“应用编辑”保存
 
 ### 跨轮回数据
 - 玩家/父亲名称
@@ -123,6 +139,7 @@ npm run build
 - 全NPC满好感
 - 解锁全部技能
 - 时间跳转（跳到毕业/重置到初始月）
+- 未选择存档时首页仍可查看，但快捷操作会保持禁用
 
 ## 数值上限
 
@@ -166,7 +183,7 @@ npm run build
 
 文件格式：
 - `v10_userdata1.dat` ~ `v10_userdata31.dat` (用户存档)
-- `v10_indexdata.dat` (存档索引)
+- `v10_configdata.dat` (用户设置)
 
 ## 技术栈
 

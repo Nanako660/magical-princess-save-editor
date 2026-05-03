@@ -1,16 +1,13 @@
 import { ref, computed } from 'vue'
 import { 
   parseSaveFile, serializeSaveFile, getPeriodText,
-  parseIndexFile, serializeIndexFile,
-  parseConfigFile, serializeConfigFile,
-  buildIndexParamsFromSaveData
+  parseConfigFile, serializeConfigFile
 } from '../utils/saveParser.js'
 import { saveDirHandle, loadDirHandle, verifyPermission, clearDir } from '../utils/dirStore.js'
 
 const hasFSA = typeof window.showOpenFilePicker === 'function'
 
 const SAVE_PATTERN = /^v10_userdata(\d+)\.dat$/i
-const INDEX_PATTERN = /^v10_indexdata\.dat$/i
 const CONFIG_PATTERN = /^v10_configdata\.dat$/i
 
 export function useSaveData() {
@@ -23,17 +20,27 @@ export function useSaveData() {
   const dirName = ref('')
   const saveSlots = ref([])
 
-  // 新增：索引、配置、设备数据
-  const indexData = ref(null)
   const configData = ref(null)
   const configLoadState = ref('idle')
   const configLoadMessage = ref('')
-  const indexFileName = ref('')
   const configFileName = ref('')
 
   let dirHandle = null
-  let indexFileHandle = null
   let configFileHandle = null
+
+  const clearSaveSelection = () => {
+    saveData.value = null
+    fileName.value = ''
+  }
+
+  const clearDirectoryDataState = () => {
+    clearSaveSelection()
+    configData.value = null
+    configLoadState.value = 'idle'
+    configLoadMessage.value = ''
+    configFileName.value = ''
+    error.value = null
+  }
 
   async function restoreDir() {
     if (!hasFSA) return
@@ -45,6 +52,7 @@ export function useSaveData() {
       dirHandle = handle
       dirName.value = handle.name
       dirReady.value = true
+      clearDirectoryDataState()
       await refreshSlots()
       if (configFileHandle && configLoadState.value !== 'ready') {
         await loadConfigData()
@@ -70,6 +78,7 @@ export function useSaveData() {
       dirHandle = handle
       dirName.value = handle.name
       dirReady.value = true
+      clearDirectoryDataState()
       await saveDirHandle(handle)
       await refreshSlots()
       if (configFileHandle && configLoadState.value !== 'ready') {
@@ -87,15 +96,11 @@ export function useSaveData() {
 
   async function refreshSlots() {
     if (!dirHandle) {
-      console.log('refreshSlots: no dirHandle')
       saveSlots.value = []
       return
     }
-    console.log('refreshSlots: scanning', dirHandle.name)
     const slots = []
-    indexFileHandle = null
     configFileHandle = null
-    indexFileName.value = ''
     configFileName.value = ''
     try {
       for await (const [name, fh] of dirHandle) {
@@ -112,13 +117,8 @@ export function useSaveData() {
               handle: fh
             })
           } catch (e) {
-            console.warn('refreshSlots: skip file', name, e)
+            console.error('读取存档文件失败：', name, e)
           }
-        }
-        // 索引文件
-        if (INDEX_PATTERN.test(name) && fh.kind === 'file') {
-          indexFileHandle = fh
-          indexFileName.value = name
         }
         // 配置文件
         if (CONFIG_PATTERN.test(name) && fh.kind === 'file') {
@@ -128,13 +128,6 @@ export function useSaveData() {
       }
       slots.sort((a, b) => a.slotId - b.slotId)
 
-      if (!indexFileHandle) {
-        try {
-          indexFileHandle = await dirHandle.getFileHandle('v10_indexdata.dat')
-          indexFileName.value = 'v10_indexdata.dat'
-        } catch {}
-      }
-
       if (!configFileHandle) {
         try {
           configFileHandle = await dirHandle.getFileHandle('v10_configdata.dat')
@@ -142,9 +135,8 @@ export function useSaveData() {
         } catch {}
       }
 
-      console.log('refreshSlots: found', slots.length, 'saves, index:', !!indexFileHandle, 'config:', !!configFileHandle)
     } catch (e) {
-      console.error('refreshSlots error:', e)
+      console.error('刷新目录失败：', e)
     }
     if (!configFileHandle) {
       configData.value = null
@@ -166,6 +158,7 @@ export function useSaveData() {
       saveData.value = parseSaveFile(content)
       fileName.value = slot.name
     } catch (e) {
+      clearSaveSelection()
       error.value = '存档加载失败：' + e.message
       console.error('loadSlot error:', e)
     } finally {
@@ -173,34 +166,10 @@ export function useSaveData() {
     }
   }
 
-  // 加载存档索引
-  async function loadIndexData() {
-    if (!indexFileHandle) {
-      console.log('loadIndexData: no index file')
-      return false
-    }
-    isLoading.value = true
-    try {
-      const file = await indexFileHandle.getFile()
-      const content = await file.text()
-      indexData.value = parseIndexFile(content)
-      console.log('loadIndexData: loaded', indexData.value?.dataList?.length, 'slots')
-      return true
-    } catch (e) {
-      error.value = '索引加载失败：' + e.message
-      console.error('loadIndexData error:', e)
-      return false
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  // 加载用户设置
   async function loadConfigData() {
     if (!configFileHandle) {
       await refreshSlots()
       if (!configFileHandle) {
-        console.log('loadConfigData: no config file')
         configData.value = null
         configLoadState.value = 'missing'
         configLoadMessage.value = '当前目录未找到用户设置文件 v10_configdata.dat'
@@ -216,7 +185,6 @@ export function useSaveData() {
       configData.value = parseConfigFile(content)
       configLoadState.value = 'ready'
       configLoadMessage.value = ''
-      console.log('loadConfigData: loaded')
       return true
     } catch (e) {
       error.value = '设置加载失败：' + e.message
@@ -225,59 +193,6 @@ export function useSaveData() {
       configLoadMessage.value = error.value
       console.error('loadConfigData error:', e)
       return false
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const importSave = async (file) => {
-    if (!file) return
-    isLoading.value = true
-    error.value = null
-    try {
-      const content = await file.text()
-      saveData.value = parseSaveFile(content)
-      fileName.value = file.name
-    } catch (e) {
-      error.value = '存档加载失败：' + e.message
-      console.error('Import error:', e)
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const pickAndImportSave = async () => {
-    if (!hasFSA) return null
-    isLoading.value = true
-    error.value = null
-    try {
-      const opts = {
-        types: [{ description: '存档文件', accept: { 'application/octet-stream': ['.dat'] } }],
-        multiple: false
-      }
-      if (dirHandle) opts.startIn = dirHandle
-
-      const [handle] = await window.showOpenFilePicker(opts)
-      const file = await handle.getFile()
-      const content = await file.text()
-      saveData.value = parseSaveFile(content)
-      fileName.value = file.name
-
-      try {
-        dirHandle = await handle.getParent()
-        dirName.value = dirHandle.name
-        dirReady.value = true
-        await saveDirHandle(dirHandle)
-        await refreshSlots()
-      } catch {}
-
-      return handle
-    } catch (e) {
-      if (e.name !== 'AbortError') {
-        error.value = '存档加载失败：' + e.message
-        console.error('Import error:', e)
-      }
-      return null
     } finally {
       isLoading.value = false
     }
@@ -318,30 +233,8 @@ export function useSaveData() {
 
     if (dirHandle) {
       try {
-        // 保存存档文件
         const ok = await writeToFile({ name: result.fileName }, result.content)
-        if (ok) {
-          // 同步更新索引文件
-          if (indexData.value && saveData.value) {
-            const slotId = saveData.value.saveSlotId || 1
-            const newParams = buildIndexParamsFromSaveData(saveData.value, slotId)
-            
-            // 更新对应槽位的索引数据
-            if (!indexData.value.dataList) indexData.value.dataList = []
-            const existingIdx = indexData.value.dataList.findIndex(p => p.saveSlotId === slotId)
-            if (existingIdx >= 0) {
-              indexData.value.dataList[existingIdx] = newParams
-            } else {
-              indexData.value.dataList.push(newParams)
-            }
-            
-            // 保存索引文件
-            const indexContent = serializeIndexFile(indexData.value)
-            await writeToFile({ name: indexFileName.value || 'v10_indexdata.dat' }, indexContent)
-            console.log('downloadSave: index synced for slot', slotId)
-          }
-          return true
-        }
+        if (ok) return true
       } catch (e) {
         error.value = '写入文件失败：' + e.message
         console.error('writeToFile failed:', e)
@@ -365,7 +258,6 @@ export function useSaveData() {
     }
   }
 
-  // 保存用户设置
   const downloadConfig = async () => {
     if (!configData.value) return false
     try {
@@ -374,7 +266,6 @@ export function useSaveData() {
         await writeToFile({ name: configFileName.value || 'v10_configdata.dat' }, content)
         return true
       }
-      // 下载方式
       const blob = new Blob([content], { type: 'text/plain' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -395,27 +286,18 @@ export function useSaveData() {
   const hasData = computed(() => saveData.value !== null && saveData.value.status !== undefined)
 
   const clearData = () => {
-    saveData.value = null
-    fileName.value = ''
+    clearSaveSelection()
     error.value = null
   }
 
   const resetDir = async () => {
     await clearDir()
     dirHandle = null
-    indexFileHandle = null
     configFileHandle = null
     dirReady.value = false
     dirName.value = ''
     saveSlots.value = []
-    saveData.value = null
-    fileName.value = ''
-    indexData.value = null
-    configData.value = null
-    configLoadState.value = 'idle'
-    configLoadMessage.value = ''
-    indexFileName.value = ''
-    configFileName.value = ''
+    clearDirectoryDataState()
     error.value = null
   }
 
@@ -424,13 +306,11 @@ export function useSaveData() {
   return {
     saveData, isLoading, fileName, error,
     dirReady, dirName, saveSlots,
-    indexData, configData,
+    configData,
     configLoadState,
     configLoadMessage,
-    indexFileName, configFileName,
-    importSave, pickAndImportSave,
     pickDir, loadSlot, refreshSlots,
-    loadIndexData, loadConfigData,
+    loadConfigData,
     exportSave, downloadSave, downloadConfig,
     getMonthText, hasData, clearData, resetDir
   }

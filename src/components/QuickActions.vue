@@ -11,9 +11,9 @@
           <n-text depth="2" strong>基本操作：</n-text>
           <n-text depth="3">点击顶部目录按钮选择存档文件，修改后点击应用编辑按钮保存更改。</n-text>
         </div>
-        <div>
+        <div >
           <n-text depth="2" strong>修改时机：</n-text>
-          <n-text depth="3">可在游戏运行过程中在主菜单修改存档，修改完成后重新加载存档生效。但建议退出游戏修改，修改完成后重新启动游戏。</n-text>
+          <n-text depth="3">可在游戏运行过程中在主菜单修改存档，修改完成后重新加载存档生效。但建议退出游戏修改，修改完成后重新启动游戏。游戏设置只能在游戏关闭的情况下修改。</n-text>
         </div>
         <div>
           <n-text depth="2" strong>功能模块：</n-text>

@@ -32,6 +32,18 @@
                 </div>
               </n-scrollbar>
             </n-popover>
+            <n-button
+              v-if="dirReady"
+              quaternary
+              type="info"
+              size="small"
+              :loading="isRefreshing"
+              :disabled="isRefreshing"
+              @click="openRefreshConfirm"
+            >
+              <template #icon><n-icon><RefreshOutline /></n-icon></template>
+              刷新
+            </n-button>
           </div>
 
           <div v-if="dirReady" class="header-actions">
@@ -41,20 +53,10 @@
               应用编辑
             </n-button>
 
-            <n-popconfirm 
-              class="header-reset-popconfirm"
-              positive-text="确认"
-              negative-text="取消"
-              @positive-click="handleReset"
-            >
-              <template #trigger>
-                <n-button quaternary type="error" size="small">
-                  <template #icon><n-icon><RefreshOutline /></n-icon></template>
-                  重置
-                </n-button>
-              </template>
-              确定重置目录配置？将清除已保存的存档目录。
-            </n-popconfirm>
+            <n-button quaternary type="error" size="small" @click="showResetModal = true">
+              <template #icon><n-icon><TrashOutline /></n-icon></template>
+              重置
+            </n-button>
           </div>
         </div>
       </n-layout-header>
@@ -154,7 +156,7 @@
       </template>
     </n-layout>
 
-    <n-modal v-model:show="showSaveModal" preset="dialog" type="info"
+    <n-modal v-model:show="showSaveModal" preset="dialog" type="success"
       title="确认应用编辑"
       :loading="isSaving"
     >
@@ -164,6 +166,27 @@
         <n-button @click="showSaveModal = false">取消</n-button>
       </template>
     </n-modal>
+
+    <n-modal v-model:show="showRefreshConfirm" preset="dialog" type="info"
+      title="确认刷新数据"
+      :loading="isRefreshing"
+    >
+      <p style="color: #ccc;">{{ refreshModalText }}</p>
+      <template #action>
+        <n-button type="info" :loading="isRefreshing" @click="handleRefreshAll">刷新</n-button>
+        <n-button @click="showRefreshConfirm = false">取消</n-button>
+      </template>
+    </n-modal>
+
+    <n-modal v-model:show="showResetModal" preset="dialog" type="error"
+      title="确认重置目录"
+    >
+      <p style="color: #ccc;">确定重置目录配置？将清除已保存的存档目录。</p>
+      <template #action>
+        <n-button type="error" @click="handleReset">确认</n-button>
+        <n-button @click="showResetModal = false">取消</n-button>
+      </template>
+    </n-modal>
   </n-config-provider>
 </template>
 
@@ -171,10 +194,10 @@
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import {
   NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
-  NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal, NSkeleton, NCard, NAlert,
+  NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NModal, NSkeleton, NCard, NAlert,
   darkTheme, createDiscreteApi
 } from 'naive-ui'
-import { FolderOpenOutline, SaveOutline, RefreshOutline } from '@vicons/ionicons5'
+import { FolderOpenOutline, SaveOutline, RefreshOutline, TrashOutline } from '@vicons/ionicons5'
 import { useSaveData } from './composables/useSaveData.js'
 import { useQuickActions } from './composables/useQuickActions.js'
 import logoSrc from './assets/logo.png'
@@ -199,8 +222,8 @@ export default {
 
   components: {
     NConfigProvider, NGlobalStyle, NLayout, NLayoutHeader, NLayoutSider, NLayoutContent, NLayoutFooter,
-    NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NPopconfirm, NModal, NSkeleton, NCard, NAlert,
-    FolderOpenOutline, SaveOutline, RefreshOutline,
+    NButton, NIcon, NText, NPopover, NScrollbar, NEmpty, NModal, NSkeleton, NCard, NAlert,
+    FolderOpenOutline, SaveOutline, RefreshOutline, TrashOutline,
     SetupGuide, Sidebar, BasicEditor, DetailedEditor, EquipmentEditor,
     FriendEditor, ItemEditor, SkillEditor, GlobalEditor, QuickActions,
     ConfigEditor, BattleArtsEditor, ActivityEditor, CurriculumEditor
@@ -217,10 +240,10 @@ export default {
       configData,
       configLoadState,
       configLoadMessage,
-      pickDir, loadSlot, downloadSave,
+      pickDir, loadSlot, refreshSlots, downloadSave,
       loadConfigData,
       downloadConfig,
-      getMonthText, hasData, resetDir
+      getMonthText, hasData, clearData, resetDir
     } = useSaveData()
 
     const { getActionInfo, executeAction } = useQuickActions(saveData)
@@ -229,8 +252,11 @@ export default {
     const renderedTab = ref('quick')
     const isTabSwitching = ref(false)
     const isSaving = ref(false)
+    const isRefreshing = ref(false)
     const slotPopoverShow = ref(false)
     const showSaveModal = ref(false)
+    const showRefreshConfirm = ref(false)
+    const showResetModal = ref(false)
     const saveBaselineSnapshot = ref(null)
     const configBaselineSnapshot = ref(null)
     const saveBaselineSerialized = ref('')
@@ -423,6 +449,11 @@ export default {
       }
       return '确定要应用当前游戏设置修改吗？'
     })
+    const refreshModalText = computed(() => (
+      hasPendingChanges.value
+        ? '刷新将丢弃当前未保存修改，并重新读取目录、当前存档和游戏设置。'
+        : '确定要重新读取目录、当前存档和游戏设置吗？'
+    ))
 
     const handlePickDir = async () => {
       suppressSaveTracking = true
@@ -465,6 +496,11 @@ export default {
         return
       }
       showSaveModal.value = true
+    }
+
+    const openRefreshConfirm = () => {
+      if (isRefreshing.value) return
+      showRefreshConfirm.value = true
     }
 
     const handleSave = async () => {
@@ -533,7 +569,89 @@ export default {
       message.success('已撤销未保存更改')
     }
 
+    const handleRefreshAll = async () => {
+      if (isRefreshing.value) return
+
+      isRefreshing.value = true
+      showRefreshConfirm.value = false
+      slotPopoverShow.value = false
+
+      const currentFileName = fileName.value
+      const currentSlotId = saveData.value?.saveSlotId || null
+      let slotReloadAttempted = false
+      let slotReloaded = false
+      let configReloadAttempted = false
+      let configReloaded = false
+      let currentMissing = false
+
+      suppressSaveTracking = true
+      suppressConfigTracking = true
+
+      try {
+        await refreshSlots()
+
+        if (currentFileName) {
+          slotReloadAttempted = true
+          const matchedSlot = saveSlots.value.find((slot) => slot.name === currentFileName)
+            || saveSlots.value.find((slot) => slot.slotId === currentSlotId)
+
+          if (matchedSlot) {
+            await loadSlot(matchedSlot)
+            if (!error.value && hasData.value) {
+              setSaveBaseline()
+              slotReloaded = true
+            } else {
+              clearSaveTrackingState()
+            }
+          } else {
+            currentMissing = true
+            clearData()
+            clearSaveTrackingState()
+          }
+        }
+
+        if (configLoadState.value !== 'missing') {
+          configReloadAttempted = true
+          const configOk = await loadConfigData()
+          if (configOk && configData.value) {
+            setConfigBaseline()
+            configReloaded = true
+          } else {
+            clearConfigTrackingState()
+          }
+        } else {
+          clearConfigTrackingState()
+        }
+      } finally {
+        suppressSaveTracking = false
+        suppressConfigTracking = false
+        isRefreshing.value = false
+      }
+
+      if (currentMissing) {
+        message.warning('当前已加载存档文件已不存在')
+        return
+      }
+
+      if (slotReloadAttempted && !slotReloaded) {
+        message.error(error.value || '当前存档刷新失败')
+        return
+      }
+
+      if (configReloadAttempted && !configReloaded && configLoadState.value === 'error') {
+        message.error(configLoadMessage.value || error.value || '游戏设置刷新失败')
+        return
+      }
+
+      if (slotReloaded || configReloaded || (!currentFileName && configLoadState.value === 'missing')) {
+        message.success('数据已刷新')
+      } else {
+        message.success('存档列表已刷新')
+      }
+    }
+
     const handleReset = async () => {
+      showResetModal.value = false
       await resetDir()
       clearAllTrackingState()
       message.success('目录配置已重置')
@@ -561,15 +679,15 @@ export default {
     return {
       darkTheme, logoSrc, appVersion,
       saveData, isLoading, fileName, activeTab, renderedTab, hasData, footerText, isWideTab,
-      dirReady, dirName, saveSlots, slotPopoverShow, isSaving,
+      dirReady, dirName, saveSlots, slotPopoverShow, isSaving, isRefreshing,
       showPreSaveEmptyState, showApplyButton, saveModalText,
-      showSaveModal, isTabSwitching, currentTabComponent, currentTabProps, currentTabListeners,
+      showSaveModal, showRefreshConfirm, showResetModal, refreshModalText, isTabSwitching, currentTabComponent, currentTabProps, currentTabListeners,
       currentSettingsStatus, showSettingsStatusView,
       isSaveDirty, isConfigDirty, hasPendingChanges, showUndoToast,
       configData,
       configLoadState, configLoadMessage,
       handlePickDir, handleLoadSlot, openSaveModal, handleSave,
-      handleQuery, handleQuickAction, handleUndoLastChange, handleReset, formatSize, handleTabChange
+      handleQuery, handleQuickAction, handleUndoLastChange, handleReset, openRefreshConfirm, handleRefreshAll, formatSize, handleTabChange
     }
   }
 }

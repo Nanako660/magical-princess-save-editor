@@ -2,10 +2,10 @@
   <section class="editor-section page-table">
     <h2 class="section-title">课程数据</h2>
     
-    <n-card title="快捷操作" size="small" style="margin-bottom: 16px;">
+    <n-card title="快捷操作" size="small" class="curriculum-actions-card">
       <n-space>
-        <n-button type="warning" ghost @click="completeAll">全部完成</n-button>
-        <n-button type="error" ghost @click="resetAll">全部重置</n-button>
+        <n-button type="warning" ghost @click="openActionConfirm('complete')">全部完成</n-button>
+        <n-button type="error" ghost @click="openActionConfirm('reset')">全部重置</n-button>
       </n-space>
     </n-card>
     
@@ -46,24 +46,41 @@
         </n-table>
       </n-scrollbar>
     </n-card>
+
+    <n-modal
+      v-model:show="showConfirmModal"
+      preset="dialog"
+      :type="pendingAction?.type || 'warning'"
+      :title="pendingAction?.title || '确认操作'"
+    >
+      <p style="color: #ccc;">{{ pendingAction?.message }}</p>
+      <template #action>
+        <n-button :type="pendingAction?.type || 'warning'" @click="handleConfirmAction">
+          {{ pendingAction?.confirmText || '确认' }}
+        </n-button>
+        <n-button @click="showConfirmModal = false">取消</n-button>
+      </template>
+    </n-modal>
   </section>
 </template>
 
 <script>
-import { computed } from 'vue'
-import { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch, NInputNumber, NSkeleton } from 'naive-ui'
+import { computed, ref } from 'vue'
+import { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch, NInputNumber, NSkeleton, NModal } from 'naive-ui'
 import { CurriculumNames } from '../data/gameData.js'
 import { useViewportTableHeight } from '../composables/useViewportTableHeight.js'
 import { useDeferredTableRender } from '../composables/useDeferredTableRender.js'
 
 export default {
   name: 'CurriculumEditor',
-  components: { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch, NInputNumber, NSkeleton },
+  components: { NCard, NSpace, NButton, NScrollbar, NTable, NSwitch, NInputNumber, NSkeleton, NModal },
   props: {
     curriculumList: { type: Array, required: true }
   },
   emits: ['update:curriculumList'],
   setup(props, { emit }) {
+    const showConfirmModal = ref(false)
+    const pendingAction = ref(null)
     const { tableHeight } = useViewportTableHeight(320, 360)
     const sortedCurriculums = computed(() => {
       return [...props.curriculumList].sort((a, b) => a.curriculumId - b.curriculumId)
@@ -97,13 +114,56 @@ export default {
       }))
       emit('update:curriculumList', updated)
     }
+
+    const openActionConfirm = (action) => {
+      pendingAction.value = action === 'reset'
+        ? {
+            action,
+            type: 'error',
+            title: '确认：全部重置',
+            message: '将把全部课程重置为未激活、未完成，剩余耐力归零。',
+            confirmText: '确认重置'
+          }
+        : {
+            action,
+            type: 'warning',
+            title: '确认：全部完成',
+            message: '将把全部课程设为已激活、已完成，剩余耐力设为 100。',
+            confirmText: '确认完成'
+          }
+      showConfirmModal.value = true
+    }
+
+    const handleConfirmAction = () => {
+      if (!pendingAction.value) return
+      if (pendingAction.value.action === 'reset') {
+        resetAll()
+      } else {
+        completeAll()
+      }
+      showConfirmModal.value = false
+      pendingAction.value = null
+    }
     
-    return { visibleCurriculums, getCurriculumName, completeAll, resetAll, tableHeight, isReady }
+    return {
+      visibleCurriculums,
+      getCurriculumName,
+      tableHeight,
+      isReady,
+      showConfirmModal,
+      pendingAction,
+      openActionConfirm,
+      handleConfirmAction
+    }
   }
 }
 </script>
 
 <style scoped>
+.curriculum-actions-card {
+  margin-bottom: 10px;
+}
+
 .table-loading-state {
   padding-bottom: 8px;
 }

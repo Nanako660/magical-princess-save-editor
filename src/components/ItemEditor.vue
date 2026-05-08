@@ -17,7 +17,6 @@
             :columns="columns"
             :data="group.items"
             size="small"
-            virtual-scroll
             :row-key="(row) => row._index"
           />
         </div>
@@ -44,7 +43,8 @@ export default {
   name: 'ItemEditor',
   components: { NText, NDataTable, NScrollbar, NSkeleton },
   props: { itemList: { type: Array, required: true } },
-  setup(props) {
+  emits: ['update:item-list'],
+  setup(props, { emit }) {
     const { tableHeight } = useViewportTableHeight(280, 360)
     const groupedItems = computed(() => {
       const groups = ItemGroups.map((group) => ({ name: group.name, items: [] }))
@@ -53,7 +53,13 @@ export default {
       props.itemList.forEach((item, index) => {
         const groupName = ITEM_GROUP_NAME_BY_ID[item.itemId] || '未分类'
         if (groupMap[groupName]) {
-          groupMap[groupName].items.push({ ...item, _index: index })
+          groupMap[groupName].items.push({
+            _index: index,
+            itemId: item.itemId,
+            count: item.count,
+            useCount: item.useCount,
+            isCraft: item.isCraft
+          })
         }
       })
 
@@ -65,6 +71,12 @@ export default {
     )
 
     const getItemName = (id) => ItemNames[id] || `物品#${id}`
+    const updateItemField = (rowIndex, field, value) => {
+      const nextList = props.itemList.map((item, index) => (
+        index === rowIndex ? { ...item, [field]: value } : item
+      ))
+      emit('update:item-list', nextList)
+    }
 
     const columns = [
       {
@@ -85,7 +97,7 @@ export default {
             min: 0,
             size: 'small',
             style: 'width: 100px',
-            'onUpdate:value': (v) => row.count = v
+            'onUpdate:value': (v) => updateItemField(row._index, 'count', v ?? 0)
           })
         }
       },
@@ -99,7 +111,7 @@ export default {
             min: 0,
             size: 'small',
             style: 'width: 100px',
-            'onUpdate:value': (v) => row.useCount = v
+            'onUpdate:value': (v) => updateItemField(row._index, 'useCount', v ?? 0)
           })
         }
       },
@@ -110,7 +122,7 @@ export default {
         render(row) {
           return h(NCheckbox, {
             checked: row.isCraft,
-            'onUpdate:checked': (v) => row.isCraft = v
+            'onUpdate:checked': (v) => updateItemField(row._index, 'isCraft', v)
           })
         }
       }

@@ -232,6 +232,7 @@ import ConfigEditor from './components/ConfigEditor.vue'
 import BattleArtsEditor from './components/BattleArtsEditor.vue'
 import ActivityEditor from './components/ActivityEditor.vue'
 import CurriculumEditor from './components/CurriculumEditor.vue'
+import AchievementEditor from './components/AchievementEditor.vue'
 
 export default {
   name: 'App',
@@ -242,7 +243,8 @@ export default {
     FolderOpenOutline, SaveOutline, RefreshOutline, TrashOutline, LogoGithub,
     SetupGuide, Sidebar, BasicEditor, DetailedEditor, EquipmentEditor,
     FriendEditor, ItemEditor, SkillEditor, GlobalEditor, QuickActions,
-    ConfigEditor, BattleArtsEditor, ActivityEditor, CurriculumEditor
+    ConfigEditor, BattleArtsEditor, ActivityEditor, CurriculumEditor,
+    AchievementEditor
   },
 
   setup() {
@@ -277,7 +279,7 @@ export default {
     const configBaselineSnapshot = ref(null)
     const saveBaselineSerialized = ref('')
     const configBaselineSerialized = ref('')
-    const wideTabs = new Set(['items', 'skills', 'battlearts', 'activity', 'curriculum'])
+    const wideTabs = new Set(['items', 'skills', 'battlearts', 'activity', 'curriculum', 'achievement'])
     let switchFrameId = null
     let suppressSaveTracking = false
     let suppressConfigTracking = false
@@ -373,6 +375,7 @@ export default {
         battlearts: BattleArtsEditor,
         activity: ActivityEditor,
         curriculum: CurriculumEditor,
+        achievement: AchievementEditor,
         config: ConfigEditor
       }[renderedTab.value] || null
     })
@@ -412,7 +415,8 @@ export default {
         global: { gstatus: saveData.value.gstatus },
         battlearts: { artsList: saveData.value.battleArtsDataParamList },
         activity: { activityList: saveData.value.activityDataParamList },
-        curriculum: { curriculumList: saveData.value.curriculumDataParamList }
+        curriculum: { curriculumList: saveData.value.curriculumDataParamList },
+        achievement: { gstatus: saveData.value.gstatus }
       }[renderedTab.value] || {}
     })
 

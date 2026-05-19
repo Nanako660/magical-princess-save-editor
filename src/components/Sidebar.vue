@@ -21,7 +21,8 @@ import {
   SettingsOutline,
   FlashOutline,
   CalendarOutline,
-  BookOutline
+  BookOutline,
+  TrophyOutline
 } from '@vicons/ionicons5'
 
 function renderIcon(icon) {
@@ -74,6 +75,7 @@ export default {
         key: 'group-other',
         children: [
           { key: 'global', label: '轮回数据', icon: renderIcon(SyncOutline) },
+          { key: 'achievement', label: '功绩', icon: renderIcon(TrophyOutline) },
           { key: 'config', label: '游戏设置', icon: renderIcon(SettingsOutline) }
         ]
       }
